@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <chrono>
 
-// 1. Representasi Domain Data Minimal
+// 1. Representasi Data
 struct Lokasi {
     std::string id_lokasi;
     std::string nama_lokasi;
@@ -23,7 +23,7 @@ struct Rute {
     double jarak_km;
 };
 
-// 2. Alat Pengukur Waktu Eksekusi (Untuk Eksperimen)
+// 2. Alat Pengukur Waktu Eksekusi
 class PerformanceTimer {
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
@@ -32,7 +32,6 @@ public:
         start_time = std::chrono::high_resolution_clock::now();
     }
 
-    // Mengembalikan waktu dalam satuan mikrodetik (microseconds)
     long long stop() {
         auto end_time = std::chrono::high_resolution_clock::now();
         return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
@@ -50,7 +49,7 @@ inline std::unordered_map<std::string, Lokasi> loadLokasi(const std::string& fil
         return mapLokasi;
     }
 
-    std::getline(file, line); // Lewati baris header CSV
+    std::getline(file, line); 
 
     while (std::getline(file, line)) {
         std::stringstream ss(line);
@@ -74,7 +73,7 @@ inline std::vector<Rute> loadRute(const std::string& filename) {
         return listRute;
     }
 
-    std::getline(file, line); // Lewati baris header CSV
+    std::getline(file, line); 
 
     while (std::getline(file, line)) {
         std::stringstream ss(line);
@@ -86,10 +85,12 @@ inline std::vector<Rute> loadRute(const std::string& filename) {
         std::getline(ss, r.lokasi_tujuan, ',');
         std::getline(ss, jarak_str, ',');
         
+
+        // Falback Kalo Data gada
         try {
             r.jarak_km = std::stod(jarak_str);
         } catch (...) {
-            r.jarak_km = 0.0; // Fallback jika data jarak kosong/korup
+            r.jarak_km = 0.0; 
         }
         listRute.push_back(r);
     }
