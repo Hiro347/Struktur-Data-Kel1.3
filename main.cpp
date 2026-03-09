@@ -1,57 +1,129 @@
-#include <iostream>
+#include <bits/stdc++.h>
 #include "utils.h"
-#include "AdjacencyList.h"
+#include "Adjanceny_me.h"
 
 using namespace std;
 
-int main() {
-    cout << "Sistem Rekomendasi Rute Distribusi Kel 1.3\n\n";
-
-   
-    unordered_map<string, Lokasi> mapLokasi = loadLokasi("lokasi.csv");
-    vector<Rute> listRute = loadRute("rute.csv");
-
-    AdjacencyList grafRute;
+int main()
+{
+    Adjency graf;
     PerformanceTimer timer;
 
-    // 2. Pengujian Awal Insert
-    cout << "Memulai pengujian INSERT...\n";
-    timer.start();
-    
-    // Insert Lokasi
-    for (const auto& pair : mapLokasi) {
-        grafRute.insertLokasi(pair.second);
+    bool data_sudah_masuk = false;
+    int pilihan = 0;
+
+    while (pilihan != 5)
+    {
+        cout << "\n=== Simple Sistem Rute ===" << endl;
+        cout << "1. Insert dataset" << endl;
+        cout << "2. Search dataset" << endl;
+        cout << "3. Delete dataset" << endl;
+        cout << "4. Print Dataset" << endl;
+        cout << "5. Keluar" << endl;
+        cout << "Pilih aksi (1-5): ";
+        cin >> pilihan;
+
+        if (pilihan == 1)
+        {
+            // Insert logic
+            auto data_lokasi = loadLokasi("lokasi.csv");
+            auto data_rute = loadRute("rute.csv");
+
+            timer.start();
+
+            // Insert data lokasi
+            for (auto it : data_lokasi)
+            {
+                graf.masuk_lokasi(it.second);
+            }
+
+            // Insert data Rute
+            for (auto it : data_rute)
+            {
+                graf.masuk_rute(it);
+            }
+
+            double waktu = timer.stop();
+            cout << "Waktu untuk Insert : " << waktu << " mikrodetik" << endl;
+            data_sudah_masuk = true;
+        }
+        else if (pilihan == 2)
+        {
+            if (data_sudah_masuk == false)
+            {
+                cout << "[!] ERROR: Harap lakukan Insert Dataset (Menu 1) terlebih dahulu!" << endl;
+                continue;
+            }
+            //==========================Logic search============================
+            int input;
+            cout << "Masukkan Lokasi Asal (1-50) = ";
+            cin >> input;
+            string asal = "Lokasi_" + to_string(input);
+
+            int input2;
+            cout << "Masukkan Lokasi Tujuan (1-50) = ";
+            cin >> input2;
+            cout << endl;
+            string tujuan = "Lokasi_" + to_string(input2);
+
+            // TIMER
+            timer.start();
+            Rute *hasil = graf.cari_rute(asal, tujuan);
+            double waktu_search = timer.stop();
+
+            if (hasil != 0)
+            {
+                cout << "Rute ditemukan, Jarak: " << hasil->jarak_km << " km" << endl;
+                cout << "Waktu pencarian : " << waktu_search << " mikrodetik" << endl;
+            }
+            else
+            {
+                cout << "Rute tidak ditemukan." << endl;
+                cout << "Waktu pencarian : " << waktu_search << " mikrodetik" << endl;
+            }
+        }
+        else if (pilihan == 3)
+        {
+            if (data_sudah_masuk == false)
+            {
+                cout << "[!] ERROR: Harap lakukan Insert Dataset (Menu 1) terlebih dahulu!" << endl;
+                continue;
+            }
+            //===================================Logic delete=======================================
+            int input3;
+            cout << "Masukkan Lokasi Asal (1-50) = ";
+            cin >> input3;
+            string asal = "Lokasi_" + to_string(input3);
+
+            int input4;
+            cout << "Masukkan Lokasi Tujuan (1-50) = ";
+            cin >> input4;
+            cout << endl;
+            string tujuan = "Lokasi_" + to_string(input4);
+
+            // TIMER 
+            timer.start();
+            graf.hapus_rute(asal, tujuan);
+            double waktu_delete = timer.stop();
+
+            cout << "Kecepatan hapus: " << waktu_delete << " mikrodetik" << endl;
+        }
+        else if (pilihan == 4)
+        {
+            if (data_sudah_masuk == false)
+            {
+                cout << "[!] ERROR: Harap lakukan Insert Dataset (Menu 1) terlebih dahulu!" << endl;
+                continue;
+            }
+            graf.print_dataset();
+        }
+        else if (pilihan == 5)
+        {
+            cout << "Berhasil Keluar" << endl;
+        }
+        else
+        {
+            cout << "Input tidak valid" << endl;
+        }
     }
-    
-    // Insert Rute
-    for (const auto& rute : listRute) {
-        grafRute.insertRute(rute);
-    }
-    
-    long long waktuInsert = timer.stop();
-    cout << "Waktu eksekusi Insert Adjacency List : " << waktuInsert << " mikrodetik.\n\n";
-
-    // Menampilkan graf untuk memastikan data masuk dengan benar
-    grafRute.printGraph();
-
-    // 3. Pengujian Awal Search
-    cout << "\nMemulai pengujian SEARCH...\n";
-    
-    string asalCari = "L001";
-    string tujuanCari = "L006";
-    
-    timer.start();
-    Rute* hasilPencarian = grafRute.searchRute(asalCari, tujuanCari);
-    long long waktuSearch = timer.stop();
-
-    if (hasilPencarian != nullptr) {
-        cout << "Rute ditemukan: " << hasilPencarian->id_rute 
-             << " | Jarak: " << hasilPencarian->jarak_km << " km\n";
-    } else {
-        cout << "Rute dari " << asalCari << " ke " << tujuanCari << " tidak ditemukan.\n";
-    };
-    
-    cout << "Waktu Selesai : " << waktuSearch << " mikrodetik.\n";
-
-    return 0;
 }

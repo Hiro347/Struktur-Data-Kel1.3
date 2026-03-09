@@ -32,4 +32,34 @@ public:
         }
         return 0;
     }
+
+    void hapus_rute(string n, string m)
+    {
+        auto &temp = daftar_rute[n];
+        for (auto it = temp.begin(); it != temp.end(); ++it)
+        {
+            if (it->lokasi_tujuan == m)
+            {
+                temp.erase(it);
+                break;
+            }
+        }
+    }
+
+    void print_dataset()
+    {
+        for (auto &it : daftar_rute)
+        {
+
+            cout << it.first;
+
+            for (auto &r : it.second)
+            {
+
+                cout << " -> " << r.lokasi_tujuan << " (" << r.jarak_km << " km)";
+            }
+
+            cout << endl;
+        }
+    }
 };
