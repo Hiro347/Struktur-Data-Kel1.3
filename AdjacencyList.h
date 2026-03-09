@@ -57,7 +57,6 @@ public:
                           << " (Jarak: " << rute.jarak_km << " km, ID Rute: " << rute.id_rute << ")\n";
             }
         }
-        std::cout << "===================================\n";
     }
 };
 

@@ -1,7 +1,51 @@
 id_lokasi,nama_lokasi,tipe_lokasi
-L001,Gudang Pusat,gudang
-L002,Hub Selatan,gudang
-L003,Toko Sudirman,tujuan
-L004,Toko Kemang,tujuan
-L005,Toko Blok M,tujuan
-L006,Toko Kuningan,tujuan
+Lokasi_1,Caguas,rumah
+Lokasi_2,Caguas,rumah
+Lokasi_3,San Jose,kantor
+Lokasi_4,Los Angeles,kantor
+Lokasi_5,Caguas,rumah
+Lokasi_6,Tonawanda,tujuan
+Lokasi_7,Caguas,tujuan
+Lokasi_8,Miami,kantor
+Lokasi_9,Caguas,kantor
+Lokasi_10,San Ramon,rumah
+Lokasi_11,Caguas,gudang
+Lokasi_12,Freeport,tujuan
+Lokasi_13,Salinas,rumah
+Lokasi_14,Caguas,rumah
+Lokasi_15,Peabody,rumah
+Lokasi_16,Caguas,gudang
+Lokasi_17,Canovanas,gudang
+Lokasi_18,Paramount,kantor
+Lokasi_19,Caguas,gudang
+Lokasi_20,Mount Prospect,rumah
+Lokasi_21,Long Beach,kantor
+Lokasi_22,Caguas,rumah
+Lokasi_23,Rancho Cordova,gudang
+Lokasi_24,Caguas,kantor
+Lokasi_25,Billings,gudang
+Lokasi_26,Caguas,kantor
+Lokasi_27,Wilkes Barre,tujuan
+Lokasi_28,Caguas,gudang
+Lokasi_29,Roseville,tujuan
+Lokasi_30,Bellflower,kantor
+Lokasi_31,Caguas,tujuan
+Lokasi_32,Wheaton,gudang
+Lokasi_33,Caguas,tujuan
+Lokasi_34,Detroit,rumah
+Lokasi_35,Dallas,gudang
+Lokasi_36,Caguas,rumah
+Lokasi_37,Carlisle,kantor
+Lokasi_38,Dallas,kantor
+Lokasi_39,Caguas,kantor
+Lokasi_40,Newark,gudang
+Lokasi_41,Panorama City,kantor
+Lokasi_42,Caguas,gudang
+Lokasi_43,Atlanta,rumah
+Lokasi_44,Caguas,gudang
+Lokasi_45,Fremont,rumah
+Lokasi_46,Caguas,tujuan
+Lokasi_47,Rochester,gudang
+Lokasi_48,Dallas,tujuan
+Lokasi_49,Bayamon,kantor
+Lokasi_50,Jakarta,rumah
