@@ -52,19 +52,50 @@ int main()
 
         if (pilihan == 1)
         {
-            auto data_lokasi = loadLokasi("lokasi.csv");
-            auto data_rute = loadRute("rute.csv");
+            int opsi_kapasitas;
+            cout << "\n=== PILIH KAPASITAS DATASET (BERDASARKAN EDGES / RUTE) ===" << endl;
+            cout << "1. 100 Ribu Edges (Rute)" << endl;
+            cout << "2. 500 Ribu Edges (Rute)" << endl;
+            cout << "3. 1 Juta Edges (Rute)" << endl;
+            cout << "4. 10 Juta Edges (Rute)" << endl;
+            cout << "5. 20 Juta Edges (Rute)" << endl;
+            cout << "6. Gunakan CSV Dummy (lokasi.csv & rute.csv)" << endl;
+            cout << "Pilih opsi (1-6): ";
+            cin >> opsi_kapasitas;
 
+            unordered_map<string, Lokasi> data_lokasi;
+            vector<Rute> data_rute;
+
+            if (opsi_kapasitas >= 1 && opsi_kapasitas <= 5) {
+                int limit_edges = 0;
+                if (opsi_kapasitas == 1) limit_edges = 100000;
+                else if (opsi_kapasitas == 2) limit_edges = 500000;
+                else if (opsi_kapasitas == 3) limit_edges = 1000000;
+                else if (opsi_kapasitas == 4) limit_edges = 10000000;
+                else if (opsi_kapasitas == 5) limit_edges = 20000000;
+
+                // Membaca file dengan limitasi berbasis rute (edge)
+                loadDimacsData(data_lokasi, data_rute, limit_edges);
+            }
+            else if (opsi_kapasitas == 6) {
+                data_lokasi = loadLokasi("lokasi.csv");
+                data_rute = loadRute("rute.csv");
+            }
+            else {
+                cout << "[!] Pilihan salah. Kembali ke menu utama." << endl;
+                continue;
+            }
+
+            // Memulai perhitungan performa waktu insert ke dalam struktur graf
             timer.start();
 
             if (tipe_struktur == 1)
             {
-                // Insert data lokasi
+                // Insert data ke Adjacency List
                 for (auto it : data_lokasi)
                 {
                     graf_list.masuk_lokasi(it.second);
                 }
-                // Insert data Rute
                 for (auto it : data_rute)
                 {
                     graf_list.masuk_rute(it);
@@ -73,12 +104,11 @@ int main()
             }
             else
             {
-                // Insert data lokasi
+                // Insert data ke Adjacency Matrix
                 for (auto it : data_lokasi)
                 {
                     graf_matrix.masuk_lokasi(it.second);
                 }
-                // Insert data Rute
                 for (auto it : data_rute)
                 {
                     graf_matrix.masuk_rute(it);
@@ -87,7 +117,7 @@ int main()
             }
 
             double waktu = timer.stop();
-            cout << "Waktu untuk Insert (" << nama_struktur << "): " << waktu << " mikrodetik" << endl;
+            cout << "\n[+] Waktu untuk Insert (" << nama_struktur << "): " << waktu << " mikrodetik" << endl;
         }
         else if (pilihan == 2)
         {

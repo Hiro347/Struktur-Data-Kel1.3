@@ -21,6 +21,7 @@
 *.so
 *.dylib
 *.dll
+.antigravitycli
 
 # Fortran module files
 *.mod
@@ -39,3 +40,11 @@
 
 # debug information files
 *.dwo
+
+# context
+*.md 
+
+# Abaikan file dataset DIMACS
+*.gr
+
+
