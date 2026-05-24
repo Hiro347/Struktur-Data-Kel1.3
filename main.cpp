@@ -3,7 +3,7 @@
 #include <string>
 #include "utils.h"
 #include "Adjacency_List.h"
-#include "AdjacencyMatrix.h"
+#include "Adjacency_Matrix.h"
 
 using namespace std;
 
@@ -193,4 +193,4 @@ int main()
             cout << "Input tidak valid" << endl;
         }
     }
-}
+}
