@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizer Sistem Rute Graf - Kelompok 1.3</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Glow backgrounds for futuristic dark theme -->
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <!-- Header Section -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">G</div>
+            <div class="logo-text">
+                <h1>Sistem Rute Graf Interaktif</h1>
+                <p>Visualisasi Perbandingan Struktur Data: List vs Matrix</p>
+            </div>
+        </div>
+        <div class="meta-group">
+            <span>Struktur Data</span>
+            <span class="meta-badge">Kelompok 1.3</span>
+            <span>Kelas A</span>
+        </div>
+    </header>
+
+    <!-- Main Content Dashboard -->
+    <main>
+        <!-- Top Control Bar -->
+        <div class="card control-bar">
+            <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+                <span style="font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: var(--text-secondary);">Struktur Utama:</span>
+                <div class="ds-toggle">
+                    <button class="toggle-btn active" id="toggleListBtn">Adjacency List</button>
+                    <button class="toggle-btn" id="toggleMatrixBtn">Adjacency Matrix</button>
+                </div>
+            </div>
+            
+            <div class="dataset-actions">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText" style="font-weight: 500;">Dataset Belum Dimuat</span>
+                </div>
+                <button class="btn btn-primary" id="btnInsertDataset">
+                    <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Insert Dataset (CSV)
+                </button>
+            </div>
+        </div>
+
+        <!-- 3-Column Workspace -->
+        <div class="workspace-grid">
+            
+            <!-- Column 1: Operations Panel (Left) -->
+            <div class="ops-panel">
+                
+                <!-- Search Dataset Card -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" style="width: 1.2rem; height: 1.2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Search Dataset
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label for="searchAsal">Lokasi Asal</label>
+                        <select id="searchAsal">
+                            <option value="">-- Pilih Asal --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchTujuan">Lokasi Tujuan</label>
+                        <select id="searchTujuan">
+                            <option value="">-- Pilih Tujuan --</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="btnSearch" style="width: 100%; margin-top: 0.5rem;">
+                        Cari Rute Langsung
+                    </button>
+                </div>
+                
+                <!-- Delete Dataset Card -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" style="width: 1.2rem; height: 1.2rem; color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Delete Dataset
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label for="deleteAsal">Lokasi Asal</label>
+                        <select id="deleteAsal">
+                            <option value="">-- Pilih Asal --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteTujuan">Lokasi Tujuan</label>
+                        <select id="deleteTujuan">
+                            <option value="">-- Pilih Tujuan --</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-danger" id="btnDelete" style="width: 100%; margin-top: 0.5rem;">
+                        Hapus Rute Terpilih
+                    </button>
+                </div>
+
+                <!-- Live Benchmarks Card -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg class="icon" style="width: 1.2rem; height: 1.2rem; color: #f59e0b;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Kecepatan Eksekusi
+                    </h2>
+                    
+                    <div class="benchmark-container">
+                        <div class="benchmark-bar-wrapper">
+                            <div class="benchmark-label">
+                                <span>Adjacency List</span>
+                                <strong id="timeListVal" style="color: var(--color-primary);">0 µs</strong>
+                            </div>
+                            <div class="benchmark-bar-bg">
+                                <div class="benchmark-bar-fill list" id="barListFill"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="benchmark-bar-wrapper">
+                            <div class="benchmark-label">
+                                <span>Adjacency Matrix</span>
+                                <strong id="timeMatrixVal" style="color: var(--color-secondary);">0 µs</strong>
+                            </div>
+                            <div class="benchmark-bar-bg">
+                                <div class="benchmark-bar-fill matrix" id="barMatrixFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3;">
+                        *Satuan µs = mikrodetik (sepersejuta detik). Menunjukkan keunggulan pencarian O(1) matriks dibanding pencarian linier list.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Column 2: Graph Visualizer (Center) -->
+            <div class="card visualizer-container" style="padding: 0.75rem;">
+                <div class="canvas-wrapper">
+                    <canvas id="graphCanvas"></canvas>
+                    
+                    <!-- Graph Type Legend overlay -->
+                    <div class="legend-panel">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--color-rumah);"></div>
+                            <span>Rumah</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--color-kantor);"></div>
+                            <span>Kantor</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--color-gudang);"></div>
+                            <span>Gudang</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--color-tujuan);"></div>
+                            <span>Tujuan</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation / Zoom overlay -->
+                    <div class="map-controls">
+                        <button class="map-btn" onclick="zoomIn()" title="Perbesar">+</button>
+                        <button class="map-btn" onclick="zoomOut()" title="Perkecil">-</button>
+                        <button class="map-btn" onclick="resetZoom()" title="Reset Kamera">⟲</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Column 3: Live Structure Inspector (Right) -->
+            <div class="card inspector-panel">
+                <h2 class="card-title" id="inspectTitle">
+                    <span class="icon">➔</span> Live Data Inspector
+                </h2>
+                
+                <div class="inspect-content" id="inspectBody">
+                    <div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                        Dataset belum dimuat. Silakan klik "Insert Dataset" di control panel atas.
+                    </div>
+                </div>
+
+                <!-- Mini Stats Board below Inspector -->
+                <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+                    <div class="stat-box">
+                        <span>Aktif Node (V)</span>
+                        <span class="stat-val" id="statActiveNodes">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span>Aktif Rute (E)</span>
+                        <span class="stat-val" id="statActiveEdges">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span>Estimasi Memori</span>
+                        <span class="stat-val" id="statMemoryEst" style="font-size: 0.75rem; color: var(--text-secondary);">-</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Print Dataset Table (Bottom Row) -->
+        <div class="card table-panel">
+            <div class="table-header-controls">
+                <h2 class="card-title" style="border: none; margin: 0; padding: 0;">
+                    <svg class="icon" style="width: 1.2rem; height: 1.2rem; color: var(--color-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Print Dataset (Tabel Rute Lengkap)
+                </h2>
+                
+                <div class="search-input-wrapper">
+                    <svg class="search-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" class="search-input" id="tableSearch" placeholder="Cari Rute, Lokasi, Jarak...">
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">ID Rute</th>
+                            <th style="width: 35%;">Lokasi Asal</th>
+                            <th style="width: 35%;">Lokasi Tujuan</th>
+                            <th style="width: 15%;">Jarak (km)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                                Dataset belum dimuat. Silakan lakukan Insert Dataset.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Table Pagination -->
+            <div class="pagination">
+                <span id="pageInfo">Halaman 1 dari 1</span>
+                <div style="display: flex; gap: 0.25rem;">
+                    <button class="page-btn" id="pagePrev" disabled>Sebelumnya</button>
+                    <button class="page-btn" id="pageNext" disabled>Berikutnya</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal-like Simulator Logs (Menu & C++ Output Replication) -->
+        <div class="card" style="padding: 1rem;">
+            <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="display: inline-block; width: 0.45rem; height: 0.45rem; background-color: var(--color-secondary); border-radius: 50%;"></span>
+                Console Output Simulator (Replikasi Log main.cpp)
+            </h3>
+            <pre class="console-output-card" id="consoleLog"></pre>
+        </div>
+    </main>
+
+    <!-- Floating UI Toast alerts -->
+    <div class="toast" id="toast">Notifikasi berhasil</div>
+
+    <!-- Scripts linking -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
