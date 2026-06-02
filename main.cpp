@@ -8,6 +8,162 @@
 
 using namespace std;
 
+struct BenchmarkMetrics {
+    double insert_us = 0;
+    double search_us = 0;
+    double update_us = 0;
+    double delete_us = 0;
+    double ram_mb = 0;
+};
+
+inline string getJsonStringValue(const string& json, const string& key) {
+    size_t pos = json.find("\"" + key + "\"");
+    if (pos == string::npos) return "";
+    size_t colon = json.find(":", pos);
+    if (colon == string::npos) return "";
+    size_t start_quote = json.find("\"", colon);
+    if (start_quote == string::npos) {
+        size_t next_comma = json.find(",", colon);
+        size_t next_brace = json.find("}", colon);
+        size_t end_pos = (next_comma != string::npos && next_comma < next_brace) ? next_comma : next_brace;
+        if (end_pos == string::npos) return "";
+        string val = json.substr(colon + 1, end_pos - colon - 1);
+        val.erase(0, val.find_first_not_of(" \t\r\n"));
+        val.erase(val.find_last_not_of(" \t\r\n") + 1);
+        return val;
+    }
+    size_t end_quote = json.find("\"", start_quote + 1);
+    if (end_quote == string::npos) return "";
+    return json.substr(start_quote + 1, end_quote - start_quote - 1);
+}
+
+inline double getJsonDoubleValue(const string& json, const string& key) {
+    string val = getJsonStringValue(json, key);
+    if (val.empty()) {
+        size_t pos = json.find("\"" + key + "\"");
+        if (pos == string::npos) return 0.0;
+        size_t colon = json.find(":", pos);
+        if (colon == string::npos) return 0.0;
+        size_t next_comma = json.find(",", colon);
+        size_t next_brace = json.find("}", colon);
+        size_t end_pos = (next_comma != string::npos && next_comma < next_brace) ? next_comma : next_brace;
+        if (end_pos == string::npos) return 0.0;
+        string num_str = json.substr(colon + 1, end_pos - colon - 1);
+        try { return stod(num_str); } catch (...) { return 0.0; }
+    }
+    try { return stod(val); } catch (...) { return 0.0; }
+}
+
+inline BenchmarkMetrics run_benchmark_list(const unordered_map<string, Lokasi>& mapLokasi, const vector<Rute>& listRute) {
+    BenchmarkMetrics m;
+    double ram_before = get_current_ram_usage_mb();
+    
+    PerformanceTimer p_timer;
+    p_timer.start();
+    
+    Adjacency graf_list_temp;
+    for (auto& pair : mapLokasi) {
+        graf_list_temp.masuk_lokasi(pair.second);
+    }
+    for (auto& rute : listRute) {
+        graf_list_temp.masuk_rute(rute);
+    }
+    
+    m.insert_us = p_timer.stop();
+    
+    double ram_after = get_current_ram_usage_mb();
+    m.ram_mb = ram_after - ram_before;
+    if (m.ram_mb < 0) m.ram_mb = 0;
+    
+    int batch_size = min(1000, (int)listRute.size());
+    if (batch_size > 0) {
+        p_timer.start();
+        for (int i = 0; i < batch_size; ++i) {
+            auto& r = listRute[i];
+            graf_list_temp.cari_rute(r.lokasi_asal, r.lokasi_tujuan);
+        }
+        m.search_us = (double)p_timer.stop() / batch_size;
+        
+        p_timer.start();
+        for (int i = 0; i < batch_size; ++i) {
+            auto& r = listRute[i];
+            graf_list_temp.update_rute(r.lokasi_asal, r.lokasi_tujuan, r.jarak_km * 1.1);
+        }
+        m.update_us = (double)p_timer.stop() / batch_size;
+        
+        p_timer.start();
+        for (int i = 0; i < batch_size; ++i) {
+            auto& r = listRute[i];
+            graf_list_temp.hapus_rute(r.lokasi_asal, r.lokasi_tujuan);
+        }
+        m.delete_us = (double)p_timer.stop() / batch_size;
+    }
+    
+    return m;
+}
+
+inline BenchmarkMetrics run_benchmark_matrix(const unordered_map<string, Lokasi>& mapLokasi, const vector<Rute>& listRute) {
+    BenchmarkMetrics m;
+    double ram_before = get_current_ram_usage_mb();
+    
+    PerformanceTimer p_timer;
+    p_timer.start();
+    
+    AdjacencyMatrix graf_matrix_temp;
+    try {
+        for (auto& pair : mapLokasi) {
+            graf_matrix_temp.masuk_lokasi(pair.second);
+        }
+        graf_matrix_temp.alokasi_memori_matrix();
+        for (auto& rute : listRute) {
+            graf_matrix_temp.masuk_rute(rute);
+        }
+        m.insert_us = p_timer.stop();
+        
+        double ram_after = get_current_ram_usage_mb();
+        m.ram_mb = ram_after - ram_before;
+        if (m.ram_mb < 0) m.ram_mb = 0;
+        
+        int batch_size = min(1000, (int)listRute.size());
+        if (batch_size > 0) {
+            p_timer.start();
+            for (int i = 0; i < batch_size; ++i) {
+                auto& r = listRute[i];
+                graf_matrix_temp.cari_rute(r.lokasi_asal, r.lokasi_tujuan);
+            }
+            m.search_us = (double)p_timer.stop() / batch_size;
+            
+            p_timer.start();
+            for (int i = 0; i < batch_size; ++i) {
+                auto& r = listRute[i];
+                graf_matrix_temp.update_rute(r.lokasi_asal, r.lokasi_tujuan, r.jarak_km * 1.1);
+            }
+            m.update_us = (double)p_timer.stop() / batch_size;
+            
+            p_timer.start();
+            for (int i = 0; i < batch_size; ++i) {
+                auto& r = listRute[i];
+                graf_matrix_temp.hapus_rute(r.lokasi_asal, r.lokasi_tujuan);
+            }
+            m.delete_us = (double)p_timer.stop() / batch_size;
+        }
+    } catch (...) {
+        m.insert_us = -1;
+        m.search_us = -1;
+        m.update_us = -1;
+        m.delete_us = -1;
+        m.ram_mb = -1;
+    }
+    return m;
+}
+
+inline void exportBenchmarkToJSON(const string& filename, const string& json_data) {
+    ofstream out(filename);
+    out << json_data;
+    out.close();
+    cout << "[+] Hasil benchmark disimpan ke: " << filename << endl;
+}
+
 int main()
 {
     Adjacency graf_list;
@@ -21,12 +177,52 @@ int main()
     int tipe_struktur = 0;
 
     int app_mode = 0;
-    while (app_mode != 1 && app_mode != 2) {
+    while (app_mode != 1 && app_mode != 2 && app_mode != 3) {
         cout << "=== PILIH MODE APLIKASI ===\n";
         cout << "1. CLI Mode\n";
         cout << "2. Web Server Mode\n";
-        cout << "Pilih mode (1-2): ";
+        cout << "3. Run & Export Full Benchmark to JSON\n";
+        cout << "Pilih mode (1-3): ";
         cin >> app_mode;
+    }
+
+    if (app_mode == 3) {
+        cout << "[+] Menjalankan Full Benchmark (100K, 500K, 1M, 5M) untuk eksport JSON...\n";
+        vector<int> limits = {100000, 500000, 1000000, 5000000};
+        string resp = "[\n";
+        for (size_t i = 0; i < limits.size(); ++i) {
+            int limit = limits[i];
+            cout << "    -> Memproses limit: " << limit << " edges...\n";
+            unordered_map<string, Lokasi> mapLokasi;
+            vector<Rute> listRute;
+            loadDimacsData(mapLokasi, listRute, limit);
+
+            BenchmarkMetrics m_list = run_benchmark_list(mapLokasi, listRute);
+            BenchmarkMetrics m_matrix = run_benchmark_matrix(mapLokasi, listRute);
+
+            if (i > 0) resp += ",\n";
+            resp += "  {\n";
+            resp += "    \"limit\": " + to_string(limit) + ",\n";
+            resp += "    \"list\": {\n";
+            resp += "      \"insert_us\": " + to_string(m_list.insert_us) + ",\n";
+            resp += "      \"search_us\": " + to_string(m_list.search_us) + ",\n";
+            resp += "      \"update_us\": " + to_string(m_list.update_us) + ",\n";
+            resp += "      \"delete_us\": " + to_string(m_list.delete_us) + ",\n";
+            resp += "      \"ram_mb\": " + to_string(m_list.ram_mb) + "\n";
+            resp += "    },\n";
+            resp += "    \"matrix\": {\n";
+            resp += "      \"insert_us\": " + to_string(m_matrix.insert_us) + ",\n";
+            resp += "      \"search_us\": " + to_string(m_matrix.search_us) + ",\n";
+            resp += "      \"update_us\": " + to_string(m_matrix.update_us) + ",\n";
+            resp += "      \"delete_us\": " + to_string(m_matrix.delete_us) + ",\n";
+            resp += "      \"ram_mb\": " + to_string(m_matrix.ram_mb) + "\n";
+            resp += "    }\n";
+            resp += "  }";
+        }
+        resp += "\n]";
+        
+        exportBenchmarkToJSON("./web/benchmark_results.json", resp);
+        return 0;
     }
 
     if (app_mode == 2) {
@@ -35,10 +231,15 @@ int main()
 
         svr.set_mount_point("/", "./web");
 
-        svr.Get("/api/animasi", [](const httplib::Request&, httplib::Response& res) {
+        svr.Get("/api/animasi", [](const httplib::Request& req, httplib::Response& res) {
+            int limit = 500;
+            if (req.has_param("limit")) {
+                try { limit = stoi(req.get_param_value("limit")); }
+                catch (...) { limit = 500; }
+            }
             unordered_map<string, Lokasi> mapLokasi;
             vector<Rute> listRute;
-            loadDimacsData(mapLokasi, listRute, 500);
+            loadDimacsData(mapLokasi, listRute, limit);
 
             string json_str = "{\"nodes\": [";
             bool first = true;
@@ -63,24 +264,14 @@ int main()
             int limit = 100000;
             string struktur = "list";
             
-            // Basic parsing of json body (e.g. {"limit": 500000, "struktur": "list"})
-            // For simplicity in C++, we do rudimentary string matching
             string body = req.body;
-            if (body.find("\"limit\"") != string::npos) {
-                size_t pos = body.find("\"limit\"");
-                size_t colon = body.find(":", pos);
-                size_t comma = body.find(",", colon);
-                size_t end_brace = body.find("}", colon);
-                size_t end_pos = (comma != string::npos && comma < end_brace) ? comma : end_brace;
-                if (colon != string::npos && end_pos != string::npos) {
-                    string limit_str = body.substr(colon + 1, end_pos - colon - 1);
-                    limit = stoi(limit_str);
-                }
+            string limit_val = getJsonStringValue(body, "limit");
+            if (!limit_val.empty()) {
+                try { limit = stoi(limit_val); } catch (...) {}
             }
-            if (body.find("\"struktur\"") != string::npos) {
-                if (body.find("matrix") != string::npos) {
-                    struktur = "matrix";
-                }
+            string struct_val = getJsonStringValue(body, "struktur");
+            if (struct_val == "matrix") {
+                struktur = "matrix";
             }
 
             unordered_map<string, Lokasi> mapLokasi;
@@ -93,14 +284,19 @@ int main()
             p_timer.start();
 
             if (struktur == "list") {
-                Adjacency graf_list_temp;
-                for (auto& pair : mapLokasi) graf_list_temp.masuk_lokasi(pair.second);
-                for (auto& rute : listRute) graf_list_temp.masuk_rute(rute);
+                graf_list.daftar_lokasi.clear();
+                graf_list.daftar_rute.clear();
+                for (auto& pair : mapLokasi) graf_list.masuk_lokasi(pair.second);
+                for (auto& rute : listRute) graf_list.masuk_rute(rute);
             } else {
-                AdjacencyMatrix graf_matrix_temp;
-                for (auto& pair : mapLokasi) graf_matrix_temp.masuk_lokasi(pair.second);
-                graf_matrix_temp.alokasi_memori_matrix();
-                for (auto& rute : listRute) graf_matrix_temp.masuk_rute(rute);
+                graf_matrix.daftar_lokasi.clear();
+                graf_matrix.lokasi_ke_index.clear();
+                graf_matrix.index_ke_lokasi.clear();
+                graf_matrix.matrix_rute.clear();
+                graf_matrix.jumlah_lokasi = 0;
+                for (auto& pair : mapLokasi) graf_matrix.masuk_lokasi(pair.second);
+                graf_matrix.alokasi_memori_matrix();
+                for (auto& rute : listRute) graf_matrix.masuk_rute(rute);
             }
 
             double waktu_us = p_timer.stop();
@@ -113,11 +309,125 @@ int main()
             res.set_content(resp, "application/json");
         });
 
+        svr.Post("/api/update", [&](const httplib::Request& req, httplib::Response& res) {
+            string body = req.body;
+            string asal = getJsonStringValue(body, "asal");
+            string tujuan = getJsonStringValue(body, "tujuan");
+            double jarak = getJsonDoubleValue(body, "jarak");
+            string struktur = getJsonStringValue(body, "struktur");
+
+            PerformanceTimer p_timer;
+            p_timer.start();
+
+            if (struktur == "matrix") {
+                graf_matrix.update_rute(asal, tujuan, jarak);
+            } else {
+                graf_list.update_rute(asal, tujuan, jarak);
+            }
+
+            double waktu_us = p_timer.stop();
+            string resp = "{\"waktu_us\": " + to_string(waktu_us) + "}";
+            res.set_content(resp, "application/json");
+        });
+
+        svr.Post("/api/benchmark-compare", [&](const httplib::Request& req, httplib::Response& res) {
+            int limit = 100000;
+            string body = req.body;
+            string limit_val = getJsonStringValue(body, "limit");
+            if (!limit_val.empty()) {
+                try { limit = stoi(limit_val); } catch (...) {}
+            }
+
+            unordered_map<string, Lokasi> mapLokasi;
+            vector<Rute> listRute;
+            loadDimacsData(mapLokasi, listRute, limit);
+
+            BenchmarkMetrics metrics_list = run_benchmark_list(mapLokasi, listRute);
+            BenchmarkMetrics metrics_matrix = run_benchmark_matrix(mapLokasi, listRute);
+
+            string resp = "{";
+            resp += "\"limit\": " + to_string(limit) + ",";
+            resp += "\"list\": {";
+            resp += "\"insert_us\": " + to_string(metrics_list.insert_us) + ",";
+            resp += "\"search_us\": " + to_string(metrics_list.search_us) + ",";
+            resp += "\"update_us\": " + to_string(metrics_list.update_us) + ",";
+            resp += "\"delete_us\": " + to_string(metrics_list.delete_us) + ",";
+            resp += "\"ram_mb\": " + to_string(metrics_list.ram_mb);
+            resp += "},";
+            resp += "\"matrix\": {";
+            resp += "\"insert_us\": " + to_string(metrics_matrix.insert_us) + ",";
+            resp += "\"search_us\": " + to_string(metrics_matrix.search_us) + ",";
+            resp += "\"update_us\": " + to_string(metrics_matrix.update_us) + ",";
+            resp += "\"delete_us\": " + to_string(metrics_matrix.delete_us) + ",";
+            resp += "\"ram_mb\": " + to_string(metrics_matrix.ram_mb);
+            resp += "}";
+            resp += "}";
+
+            res.set_content(resp, "application/json");
+        });
+
+        svr.Post("/api/full-benchmark", [&](const httplib::Request& req, httplib::Response& res) {
+            vector<int> limits = {100000, 500000, 1000000, 5000000};
+            
+            string body = req.body;
+            size_t lim_pos = body.find("\"limits\"");
+            if (lim_pos != string::npos) {
+                size_t start_arr = body.find("[", lim_pos);
+                size_t end_arr = body.find("]", lim_pos);
+                if (start_arr != string::npos && end_arr != string::npos && end_arr > start_arr) {
+                    limits.clear();
+                    string arr_content = body.substr(start_arr + 1, end_arr - start_arr - 1);
+                    stringstream ss(arr_content);
+                    string item;
+                    while (getline(ss, item, ',')) {
+                        try {
+                            limits.push_back(stoi(item));
+                        } catch (...) {}
+                    }
+                }
+            }
+
+            string resp = "[";
+            for (size_t i = 0; i < limits.size(); ++i) {
+                int limit = limits[i];
+                unordered_map<string, Lokasi> mapLokasi;
+                vector<Rute> listRute;
+                loadDimacsData(mapLokasi, listRute, limit);
+
+                BenchmarkMetrics m_list = run_benchmark_list(mapLokasi, listRute);
+                BenchmarkMetrics m_matrix = run_benchmark_matrix(mapLokasi, listRute);
+
+                if (i > 0) resp += ",";
+                resp += "{";
+                resp += "\"limit\": " + to_string(limit) + ",";
+                resp += "\"list\": {";
+                resp += "\"insert_us\": " + to_string(m_list.insert_us) + ",";
+                resp += "\"search_us\": " + to_string(m_list.search_us) + ",";
+                resp += "\"update_us\": " + to_string(m_list.update_us) + ",";
+                resp += "\"delete_us\": " + to_string(m_list.delete_us) + ",";
+                resp += "\"ram_mb\": " + to_string(m_list.ram_mb);
+                resp += "},";
+                resp += "\"matrix\": {";
+                resp += "\"insert_us\": " + to_string(m_matrix.insert_us) + ",";
+                resp += "\"search_us\": " + to_string(m_matrix.search_us) + ",";
+                resp += "\"update_us\": " + to_string(m_matrix.update_us) + ",";
+                resp += "\"delete_us\": " + to_string(m_matrix.delete_us) + ",";
+                resp += "\"ram_mb\": " + to_string(m_matrix.ram_mb);
+                resp += "}";
+                resp += "}";
+            }
+            resp += "]";
+
+            exportBenchmarkToJSON("./web/benchmark_results.json", resp);
+
+            res.set_content(resp, "application/json");
+        });
+
         svr.listen("localhost", 8080);
         return 0;
     }
 
-    while (pilihan != 6)
+    while (pilihan != 7)
     {
         if (tipe_struktur == 0)
         {
@@ -141,11 +451,12 @@ int main()
         cout << "\n=== Simple Sistem Rute (" << nama_struktur << ") ===" << endl;
         cout << "1. Insert dataset" << endl;
         cout << "2. Search dataset" << endl;
-        cout << "3. Delete dataset" << endl;
-        cout << "4. Print Dataset" << endl;
-        cout << "5. Ganti Struktur Data" << endl;
-        cout << "6. Keluar" << endl;
-        cout << "Pilih aksi (1-6): ";
+        cout << "3. Update dataset" << endl;
+        cout << "4. Delete dataset" << endl;
+        cout << "5. Print Dataset" << endl;
+        cout << "6. Ganti Struktur Data" << endl;
+        cout << "7. Keluar" << endl;
+        cout << "Pilih aksi (1-7): ";
         cin >> pilihan;
 
         if (pilihan == 1)
@@ -172,7 +483,6 @@ int main()
                 else if (opsi_kapasitas == 4) limit_edges = 10000000;
                 else if (opsi_kapasitas == 5) limit_edges = 20000000;
 
-                // Membaca file dengan limitasi berbasis rute (edge)
                 loadDimacsData(data_lokasi, data_rute, limit_edges);
             }
             else if (opsi_kapasitas == 6) {
@@ -184,12 +494,12 @@ int main()
                 continue;
             }
 
-            // Memulai perhitungan performa waktu insert ke dalam struktur graf
             timer.start();
 
             if (tipe_struktur == 1)
             {
-                // Insert data ke Adjacency List
+                graf_list.daftar_lokasi.clear();
+                graf_list.daftar_rute.clear();
                 for (auto it : data_lokasi)
                 {
                     graf_list.masuk_lokasi(it.second);
@@ -202,7 +512,11 @@ int main()
             }
             else
             {
-                // Insert data ke Adjacency Matrix
+                graf_matrix.daftar_lokasi.clear();
+                graf_matrix.lokasi_ke_index.clear();
+                graf_matrix.index_ke_lokasi.clear();
+                graf_matrix.matrix_rute.clear();
+                graf_matrix.jumlah_lokasi = 0;
                 for (auto it : data_lokasi)
                 {
                     graf_matrix.masuk_lokasi(it.second);
@@ -226,16 +540,12 @@ int main()
                 continue;
             }
 
-            int input;
-            cout << "Masukkan Lokasi Asal (1-50) = ";
-            cin >> input;
-            string asal = "Lokasi_" + to_string(input);
-
-            int input2;
-            cout << "Masukkan Lokasi Tujuan (1-50) = ";
-            cin >> input2;
+            string asal, tujuan;
+            cout << "Masukkan ID Lokasi Asal (contoh: Lokasi_1023) = ";
+            cin >> asal;
+            cout << "Masukkan ID Lokasi Tujuan (contoh: Lokasi_5041) = ";
+            cin >> tujuan;
             cout << endl;
-            string tujuan = "Lokasi_" + to_string(input2);
 
             timer.start();
             Rute *hasil = nullptr;
@@ -259,7 +569,7 @@ int main()
             }
             cout << "Waktu pencarian (" << nama_struktur << "): " << waktu_search << " mikrodetik" << endl;
         }
-        else if (pilihan == 3)
+        else if (pilihan == 3) // Update
         {
             if (data_sudah_masuk == false)
             {
@@ -267,16 +577,35 @@ int main()
                 continue;
             }
 
-            int input3;
-            cout << "Masukkan Lokasi Asal (1-50) = ";
-            cin >> input3;
-            string asal = "Lokasi_" + to_string(input3);
+            string asal, tujuan;
+            double jarak_baru;
+            cout << "Masukkan ID Lokasi Asal (contoh: Lokasi_1023): ";  cin >> asal;
+            cout << "Masukkan ID Lokasi Tujuan (contoh: Lokasi_5041): "; cin >> tujuan;
+            cout << "Masukkan Jarak Baru (km): ";  cin >> jarak_baru;
 
-            int input4;
-            cout << "Masukkan Lokasi Tujuan (1-50) = ";
-            cin >> input4;
+            timer.start();
+            if (tipe_struktur == 1)
+                graf_list.update_rute(asal, tujuan, jarak_baru);
+            else
+                graf_matrix.update_rute(asal, tujuan, jarak_baru);
+            double waktu_update = timer.stop();
+
+            cout << "Kecepatan update (" << nama_struktur << "): " << waktu_update << " mikrodetik" << endl;
+        }
+        else if (pilihan == 4) // Delete
+        {
+            if (data_sudah_masuk == false)
+            {
+                cout << "[!] ERROR: Harap lakukan Insert Dataset (Menu 1) terlebih dahulu untuk " << nama_struktur << "!" << endl;
+                continue;
+            }
+
+            string asal, tujuan;
+            cout << "Masukkan ID Lokasi Asal (contoh: Lokasi_1023) = ";
+            cin >> asal;
+            cout << "Masukkan ID Lokasi Tujuan (contoh: Lokasi_5041) = ";
+            cin >> tujuan;
             cout << endl;
-            string tujuan = "Lokasi_" + to_string(input4);
 
             timer.start();
             if (tipe_struktur == 1)
@@ -291,7 +620,7 @@ int main()
 
             cout << "Kecepatan hapus (" << nama_struktur << "): " << waktu_delete << " mikrodetik" << endl;
         }
-        else if (pilihan == 4)
+        else if (pilihan == 5)
         {
             if (data_sudah_masuk == false)
             {
@@ -307,13 +636,12 @@ int main()
                 graf_matrix.print_dataset();
             }
         }
-        else if (pilihan == 5)
+        else if (pilihan == 6)
         {
-            // Reset tipe_struktur agar masuk ke pemilihan struktur data lagi
             tipe_struktur = 0;
             cout << "[+] Berhasil berpindah struktur data. Silakan pilih kembali.\n" << endl;
         }
-        else if (pilihan == 6)
+        else if (pilihan == 7)
         {
             cout << "Berhasil Keluar" << endl;
         }

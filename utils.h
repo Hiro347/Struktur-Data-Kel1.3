@@ -7,6 +7,10 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+#include <winsock2.h>
 #include <chrono>
 #include <windows.h>
 #include <psapi.h>

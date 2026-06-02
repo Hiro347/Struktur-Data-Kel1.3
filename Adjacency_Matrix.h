@@ -33,6 +33,10 @@ public:
     // Mengalokasikan matriks 2D sekaligus (Batch Allocation)
     void alokasi_memori_matrix()
     {
+        if (jumlah_lokasi > 5000)
+        {
+            throw std::bad_alloc();
+        }
         matrix_rute.resize(jumlah_lokasi);
         for (int i = 0; i < jumlah_lokasi; i++)
         {
@@ -75,6 +79,29 @@ public:
             }
         }
         return nullptr; // Rute tidak ditemukan
+    }
+
+    void update_rute(const std::string& n, const std::string& m, double jarak_baru)
+    {
+        auto it_asal   = lokasi_ke_index.find(n);
+        auto it_tujuan = lokasi_ke_index.find(m);
+
+        if (it_asal   != lokasi_ke_index.end() &&
+            it_tujuan != lokasi_ke_index.end())
+        {
+            int u = it_asal->second;
+            int v = it_tujuan->second;
+            if (matrix_rute[u][v].jarak_km >= 0.0)
+            {
+                matrix_rute[u][v].jarak_km = jarak_baru;
+                std::cout << "[+] Berhasil update rute " << n 
+                          << " -> " << m 
+                          << " menjadi " << jarak_baru << " km" << std::endl;
+                return;
+            }
+        }
+        std::cout << "[-] Rute dari " << n << " ke " << m 
+                  << " tidak ditemukan." << std::endl;
     }
 
     // Menghapus rute dengan menyetel kembali nilai jarak ke -1.0

@@ -43,6 +43,27 @@ public:
         return nullptr; // Menggunakan nullptr daripada 0 di C++ Modern
     }
 
+    void update_rute(const std::string& n, const std::string& m, double jarak_baru)
+    {
+        auto it_find = daftar_rute.find(n);
+        if (it_find != daftar_rute.end())
+        {
+            for (auto& it : it_find->second)
+            {
+                if (it.lokasi_tujuan == m)
+                {
+                    it.jarak_km = jarak_baru;
+                    std::cout << "[+] Berhasil update rute " << n 
+                              << " -> " << m 
+                              << " menjadi " << jarak_baru << " km" << std::endl;
+                    return;
+                }
+            }
+        }
+        std::cout << "[-] Rute dari " << n << " ke " << m 
+                  << " tidak ditemukan." << std::endl;
+    }
+
     // Dioptimalkan menggunakan '.find()' agar aman dari efek samping operator []
     void hapus_rute(const std::string& n, const std::string& m)
     {
