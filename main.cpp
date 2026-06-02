@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "Adjacency_List.h"
 #include "Adjacency_Matrix.h"
+#include "httplib.h"
 
 using namespace std;
 
@@ -18,6 +19,103 @@ int main()
 
     int pilihan = 0;
     int tipe_struktur = 0;
+
+    int app_mode = 0;
+    while (app_mode != 1 && app_mode != 2) {
+        cout << "=== PILIH MODE APLIKASI ===\n";
+        cout << "1. CLI Mode\n";
+        cout << "2. Web Server Mode\n";
+        cout << "Pilih mode (1-2): ";
+        cin >> app_mode;
+    }
+
+    if (app_mode == 2) {
+        cout << "[+] Memulai Web Server di port 8080...\n";
+        httplib::Server svr;
+
+        svr.set_mount_point("/", "./web");
+
+        svr.Get("/api/animasi", [](const httplib::Request&, httplib::Response& res) {
+            unordered_map<string, Lokasi> mapLokasi;
+            vector<Rute> listRute;
+            loadDimacsData(mapLokasi, listRute, 500);
+
+            string json_str = "{\"nodes\": [";
+            bool first = true;
+            for (auto& pair : mapLokasi) {
+                if (!first) json_str += ", ";
+                json_str += "{\"id\": \"" + pair.second.id_lokasi + "\", \"label\": \"" + pair.second.nama_lokasi + "\", \"group\": \"" + pair.second.tipe_lokasi + "\"}";
+                first = false;
+            }
+            json_str += "], \"edges\": [";
+            first = true;
+            for (auto& rute : listRute) {
+                if (!first) json_str += ", ";
+                json_str += "{\"from\": \"" + rute.lokasi_asal + "\", \"to\": \"" + rute.lokasi_tujuan + "\", \"label\": \"" + to_string((int)rute.jarak_km) + "\"}";
+                first = false;
+            }
+            json_str += "]}";
+
+            res.set_content(json_str, "application/json");
+        });
+
+        svr.Post("/api/benchmark", [&](const httplib::Request& req, httplib::Response& res) {
+            int limit = 100000;
+            string struktur = "list";
+            
+            // Basic parsing of json body (e.g. {"limit": 500000, "struktur": "list"})
+            // For simplicity in C++, we do rudimentary string matching
+            string body = req.body;
+            if (body.find("\"limit\"") != string::npos) {
+                size_t pos = body.find("\"limit\"");
+                size_t colon = body.find(":", pos);
+                size_t comma = body.find(",", colon);
+                size_t end_brace = body.find("}", colon);
+                size_t end_pos = (comma != string::npos && comma < end_brace) ? comma : end_brace;
+                if (colon != string::npos && end_pos != string::npos) {
+                    string limit_str = body.substr(colon + 1, end_pos - colon - 1);
+                    limit = stoi(limit_str);
+                }
+            }
+            if (body.find("\"struktur\"") != string::npos) {
+                if (body.find("matrix") != string::npos) {
+                    struktur = "matrix";
+                }
+            }
+
+            unordered_map<string, Lokasi> mapLokasi;
+            vector<Rute> listRute;
+            loadDimacsData(mapLokasi, listRute, limit);
+
+            double ram_sebelum = get_current_ram_usage_mb();
+            
+            PerformanceTimer p_timer;
+            p_timer.start();
+
+            if (struktur == "list") {
+                Adjacency graf_list_temp;
+                for (auto& pair : mapLokasi) graf_list_temp.masuk_lokasi(pair.second);
+                for (auto& rute : listRute) graf_list_temp.masuk_rute(rute);
+            } else {
+                AdjacencyMatrix graf_matrix_temp;
+                for (auto& pair : mapLokasi) graf_matrix_temp.masuk_lokasi(pair.second);
+                graf_matrix_temp.alokasi_memori_matrix();
+                for (auto& rute : listRute) graf_matrix_temp.masuk_rute(rute);
+            }
+
+            double waktu_us = p_timer.stop();
+            double ram_sesudah = get_current_ram_usage_mb();
+
+            double diff_ram = ram_sesudah - ram_sebelum;
+            if (diff_ram < 0) diff_ram = 0;
+
+            string resp = "{\"waktu_ms\": " + to_string(waktu_us / 1000.0) + ", \"ram_mb\": " + to_string(diff_ram) + "}";
+            res.set_content(resp, "application/json");
+        });
+
+        svr.listen("localhost", 8080);
+        return 0;
+    }
 
     while (pilihan != 6)
     {
@@ -109,6 +207,7 @@ int main()
                 {
                     graf_matrix.masuk_lokasi(it.second);
                 }
+                graf_matrix.alokasi_memori_matrix();
                 for (auto it : data_rute)
                 {
                     graf_matrix.masuk_rute(it);

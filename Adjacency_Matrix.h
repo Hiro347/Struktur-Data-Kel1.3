@@ -27,20 +27,19 @@ public:
             lokasi_ke_index[loc.id_lokasi] = jumlah_lokasi;
             index_ke_lokasi.push_back(loc.id_lokasi);
             jumlah_lokasi++;
+        }
+    }
 
-            // Resize matriks dua dimensi secara dinamis agar sesuai jumlah lokasi baru
-            matrix_rute.resize(jumlah_lokasi);
-            for (int i = 0; i < jumlah_lokasi; i++)
+    // Mengalokasikan matriks 2D sekaligus (Batch Allocation)
+    void alokasi_memori_matrix()
+    {
+        matrix_rute.resize(jumlah_lokasi);
+        for (int i = 0; i < jumlah_lokasi; i++)
+        {
+            matrix_rute[i].resize(jumlah_lokasi);
+            for (int j = 0; j < jumlah_lokasi; j++)
             {
-                matrix_rute[i].resize(jumlah_lokasi);
-                for (int j = 0; j < jumlah_lokasi; j++)
-                {
-                    // Jika cell baru terbentuk dan kosong, inisialisasi bobot dengan -1.0 (tidak ada rute)
-                    if (matrix_rute[i][j].id_rute.empty())
-                    {
-                        matrix_rute[i][j].jarak_km = -1.0;
-                    }
-                }
+                matrix_rute[i][j].jarak_km = -1.0;
             }
         }
     }

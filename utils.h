@@ -8,6 +8,8 @@
 #include <string>
 #include <unordered_map>
 #include <chrono>
+#include <windows.h>
+#include <psapi.h>
 
 // 1. Representasi Data
 struct Lokasi {
@@ -37,6 +39,15 @@ public:
         return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     }
 };
+
+inline double get_current_ram_usage_mb() {
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        return static_cast<double>(pmc.WorkingSetSize) / (1024.0 * 1024.0);
+    }
+    return 0.0;
+}
+
 
 
 

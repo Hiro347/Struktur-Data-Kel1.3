@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualizer Sistem Rute Graf - Kelompok 1.3</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Vis.js -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
     <!-- Glow backgrounds for futuristic dark theme -->
@@ -146,7 +148,7 @@
             <!-- Column 2: Graph Visualizer (Center) -->
             <div class="card visualizer-container" style="padding: 0.75rem;">
                 <div class="canvas-wrapper">
-                    <canvas id="graphCanvas"></canvas>
+                    <div id="graphCanvas" style="width: 100%; height: 100%;"></div>
                     
                     <!-- Graph Type Legend overlay -->
                     <div class="legend-panel">
