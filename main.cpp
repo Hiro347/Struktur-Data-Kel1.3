@@ -494,12 +494,25 @@ int main()
                 continue;
             }
 
+            if (tipe_struktur == 1)
+            {
+                unordered_map<string, Lokasi>().swap(graf_list.daftar_lokasi);
+                unordered_map<string, vector<Rute>>().swap(graf_list.daftar_rute);
+            }
+            else
+            {
+                unordered_map<string, Lokasi>().swap(graf_matrix.daftar_lokasi);
+                unordered_map<string, int>().swap(graf_matrix.lokasi_ke_index);
+                vector<string>().swap(graf_matrix.index_ke_lokasi);
+                vector<vector<Rute>>().swap(graf_matrix.matrix_rute);
+                graf_matrix.jumlah_lokasi = 0;
+            }
+
+            double ram_sebelum = get_current_ram_usage_mb();
             timer.start();
 
             if (tipe_struktur == 1)
             {
-                graf_list.daftar_lokasi.clear();
-                graf_list.daftar_rute.clear();
                 for (auto it : data_lokasi)
                 {
                     graf_list.masuk_lokasi(it.second);
@@ -512,11 +525,6 @@ int main()
             }
             else
             {
-                graf_matrix.daftar_lokasi.clear();
-                graf_matrix.lokasi_ke_index.clear();
-                graf_matrix.index_ke_lokasi.clear();
-                graf_matrix.matrix_rute.clear();
-                graf_matrix.jumlah_lokasi = 0;
                 for (auto it : data_lokasi)
                 {
                     graf_matrix.masuk_lokasi(it.second);
@@ -530,7 +538,12 @@ int main()
             }
 
             double waktu = timer.stop();
+            double ram_sesudah = get_current_ram_usage_mb();
+            double ram_penggunaan = ram_sesudah - ram_sebelum;
+            if (ram_penggunaan < 0) ram_penggunaan = 0.0;
+
             cout << "\n[+] Waktu untuk Insert (" << nama_struktur << "): " << waktu << " mikrodetik" << endl;
+            cout << "[+] Penggunaan RAM saat Insert: " << ram_penggunaan << " MB" << endl;
         }
         else if (pilihan == 2)
         {
