@@ -191,8 +191,8 @@ int main()
     }
 
     if (app_mode == 3) {
-        cout << "[+] Menjalankan Full Benchmark (100K, 500K, 1M, 5M) untuk eksport JSON...\n";
-        vector<int> limits = {100000, 500000, 1000000, 5000000};
+        cout << "[+] Menjalankan Full Benchmark (1K, 5K, 10K, 100K, 500K, 1M, 5M) untuk eksport JSON...\n";
+        vector<int> limits = {1000, 5000, 10000, 100000, 500000, 1000000, 5000000};
         string resp = "[\n";
         for (size_t i = 0; i < limits.size(); ++i) {
             int limit = limits[i];
@@ -387,7 +387,7 @@ int main()
         });
 
         svr.Post("/api/full-benchmark", [&](const httplib::Request& req, httplib::Response& res) {
-            vector<int> limits = {100000, 500000, 1000000, 5000000};
+            vector<int> limits = {1000, 5000, 10000, 100000, 500000, 1000000, 5000000};
             
             string body = req.body;
             size_t lim_pos = body.find("\"limits\"");

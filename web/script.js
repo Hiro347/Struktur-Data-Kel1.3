@@ -338,16 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     benchData = await benchRes.json();
                 }
 
-                // 2b. Fetch side-by-side comparison in background for dashboard charts
-                addLog(`Mengambil data benchmark perbandingan List vs Matrix secara riil...`);
-                const compareRes = await safeFetch('/api/benchmark-compare', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ limit: benchmarkLimit })
-                });
-                if (compareRes && compareRes.ok) {
-                    compareData = await compareRes.json();
-                }
             }
 
             // Save variables
@@ -407,16 +397,10 @@ document.addEventListener('DOMContentLoaded', () => {
             drawGraphVis(animData);
 
             // 9. Update Overview Dashboard Chart
-            if (compareData) {
-                updateOverviewChart(
-                    compareData.list.insert_us / 1000.0,
-                    compareData.matrix.insert_us / 1000.0,
-                    compareData.list.ram_mb,
-                    compareData.matrix.ram_mb
-                );
+            if (currentStruktur === 'list') {
+                updateOverviewChart(benchData.waktu_ms, null, benchData.ram_mb, null);
             } else {
-                // fallback for CSV
-                updateOverviewChart(benchData.waktu_ms, 0, benchData.ram_mb, 0);
+                updateOverviewChart(null, benchData.waktu_ms, null, benchData.ram_mb);
             }
 
             addLog(`[+] Sukses memproses dataset! Waktu: ${benchData.waktu_ms.toFixed(2)} ms, RAM: ${benchData.ram_mb.toFixed(2)} MB`);
@@ -673,13 +657,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================
     btnRunFullBenchmark.addEventListener('click', async () => {
         benchmarkStatus.innerHTML = '<span class="spinner"></span> Menjalankan...';
-        addLog("Menjalankan stres-test full benchmark (100K, 500K, 1M, 5M rute)...");
+        addLog("Menjalankan stres-test full benchmark (1K, 5K, 10K, 100K, 500K, 1M, 5M rute)...");
         
         let results = null;
         const res = await safeFetch('/api/full-benchmark', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ limits: [100000, 500000, 1000000, 5000000] })
+            body: JSON.stringify({ limits: [1000, 5000, 10000, 100000, 500000, 1000000, 5000000] })
         });
         
         if (res && res.ok) {
@@ -807,6 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 scales: {
                     x: {
+                        type: 'logarithmic',
                         grid: { color: gridColor },
                         ticks: { color: tickColor },
                         title: {
@@ -1015,6 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 scales: {
                     x: {
+                        type: 'logarithmic',
                         grid: { color: gridColor },
                         ticks: { color: tickColor }
                     },
@@ -1029,8 +1015,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateOverviewChart(listInsertMs, matrixInsertMs, listRamMb, matrixRamMb) {
         if (!overviewChartInstance) return;
-        overviewChartInstance.data.datasets[0].data = [listInsertMs, listRamMb];
-        overviewChartInstance.data.datasets[1].data = [matrixInsertMs >= 0 ? matrixInsertMs : 0, matrixRamMb >= 0 ? matrixRamMb : 0];
+        if (listInsertMs !== null && listRamMb !== null) {
+            overviewChartInstance.data.datasets[0].data = [listInsertMs, listRamMb];
+        }
+        if (matrixInsertMs !== null && matrixRamMb !== null) {
+            overviewChartInstance.data.datasets[1].data = [matrixInsertMs >= 0 ? matrixInsertMs : 0, matrixRamMb >= 0 ? matrixRamMb : 0];
+        }
         overviewChartInstance.update();
     }
 

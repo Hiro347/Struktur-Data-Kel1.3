@@ -1,1 +1,121 @@
-[{"limit": 100000,"list": {"insert_us": 50416.000000,"search_us": 0.013000,"update_us": 189.698000,"delete_us": 133.911000,"ram_mb": 18.929688},"matrix": {"insert_us": -1.000000,"search_us": -1.000000,"update_us": -1.000000,"delete_us": -1.000000,"ram_mb": -1.000000}},{"limit": 500000,"list": {"insert_us": 341226.000000,"search_us": 0.036000,"update_us": 156.009000,"delete_us": 125.973000,"ram_mb": 114.320312},"matrix": {"insert_us": -1.000000,"search_us": -1.000000,"update_us": -1.000000,"delete_us": -1.000000,"ram_mb": -1.000000}},{"limit": 1000000,"list": {"insert_us": 841131.000000,"search_us": 0.014000,"update_us": 220.699000,"delete_us": 158.765000,"ram_mb": 228.023438},"matrix": {"insert_us": -1.000000,"search_us": -1.000000,"update_us": -1.000000,"delete_us": -1.000000,"ram_mb": -1.000000}},{"limit": 5000000,"list": {"insert_us": 4518141.000000,"search_us": 0.009000,"update_us": 230.019000,"delete_us": 117.189000,"ram_mb": 1130.015625},"matrix": {"insert_us": -1.000000,"search_us": -1.000000,"update_us": -1.000000,"delete_us": -1.000000,"ram_mb": -1.000000}}]
+[
+  {
+    "limit": 1000,
+    "list": {
+      "insert_us": 348.000000,
+      "search_us": 0.009000,
+      "update_us": 5.586000,
+      "delete_us": 24.961000,
+      "ram_mb": 0.250000
+    },
+    "matrix": {
+      "insert_us": 11697.000000,
+      "search_us": 0.056000,
+      "update_us": 14.910000,
+      "delete_us": 9.428000,
+      "ram_mb": 27.054688
+    }
+  },
+  {
+    "limit": 5000,
+    "list": {
+      "insert_us": 1012.000000,
+      "search_us": 0.007000,
+      "update_us": 8.799000,
+      "delete_us": 16.275000,
+      "ram_mb": 0.769531
+    },
+    "matrix": {
+      "insert_us": 184885.000000,
+      "search_us": 0.042000,
+      "update_us": 11.970000,
+      "delete_us": 31.267000,
+      "ram_mb": 610.351562
+    }
+  },
+  {
+    "limit": 10000,
+    "list": {
+      "insert_us": 3173.000000,
+      "search_us": 0.008000,
+      "update_us": 11.687000,
+      "delete_us": 15.446000,
+      "ram_mb": 1.554688
+    },
+    "matrix": {
+      "insert_us": 612994.000000,
+      "search_us": 0.038000,
+      "update_us": 15.520000,
+      "delete_us": 19.765000,
+      "ram_mb": 2044.292969
+    }
+  },
+  {
+    "limit": 100000,
+    "list": {
+      "insert_us": 49757.000000,
+      "search_us": 0.009000,
+      "update_us": 23.247000,
+      "delete_us": 17.307000,
+      "ram_mb": 23.886719
+    },
+    "matrix": {
+      "insert_us": -1.000000,
+      "search_us": -1.000000,
+      "update_us": -1.000000,
+      "delete_us": -1.000000,
+      "ram_mb": -1.000000
+    }
+  },
+  {
+    "limit": 500000,
+    "list": {
+      "insert_us": 295095.000000,
+      "search_us": 0.009000,
+      "update_us": 35.296000,
+      "delete_us": 21.499000,
+      "ram_mb": 115.585938
+    },
+    "matrix": {
+      "insert_us": -1.000000,
+      "search_us": -1.000000,
+      "update_us": -1.000000,
+      "delete_us": -1.000000,
+      "ram_mb": -1.000000
+    }
+  },
+  {
+    "limit": 1000000,
+    "list": {
+      "insert_us": 629936.000000,
+      "search_us": 0.008000,
+      "update_us": 29.015000,
+      "delete_us": 22.555000,
+      "ram_mb": 231.167969
+    },
+    "matrix": {
+      "insert_us": -1.000000,
+      "search_us": -1.000000,
+      "update_us": -1.000000,
+      "delete_us": -1.000000,
+      "ram_mb": -1.000000
+    }
+  },
+  {
+    "limit": 5000000,
+    "list": {
+      "insert_us": 3270703.000000,
+      "search_us": 0.008000,
+      "update_us": 33.533000,
+      "delete_us": 24.767000,
+      "ram_mb": 1129.867188
+    },
+    "matrix": {
+      "insert_us": -1.000000,
+      "search_us": -1.000000,
+      "update_us": -1.000000,
+      "delete_us": -1.000000,
+      "ram_mb": -1.000000
+    }
+  }
+]
