@@ -126,16 +126,27 @@
                 <section class="view-section" id="view-dashboard">
                     <div class="dashboard-layout-grid">
                         
-                        <!-- Col 1: Overview Chart -->
+                        <!-- Col 1a: Overview Chart (Load & RAM) -->
                         <div class="ui-card" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                Grafik Uji Cepat Kinerja (Latency List vs Matrix)
+                                Grafik Beban (Load Time & RAM)
                             </div>
-                            <div style="flex:1; min-height: 240px; position: relative;">
+                            <div style="flex:1; min-height: 200px; position: relative;">
                                 <canvas id="overviewChart"></canvas>
                             </div>
-                            <p class="bench-hint" style="margin-top: 0.75rem;">*Menampilkan perbandingan waktu operasi pada dataset yang sedang aktif saat ini.</p>
+                        </div>
+
+                        <!-- Col 1b: CRUD Operations Chart -->
+                        <div class="ui-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Grafik Latensi Operasi Langsung (Live CRUD)
+                            </div>
+                            <div style="flex:1; min-height: 200px; position: relative;">
+                                <canvas id="crudChart"></canvas>
+                            </div>
+                            <p class="bench-hint" style="margin-top: 0.75rem;">*Menampilkan waktu operasi (ms) pada dataset yang sedang aktif saat ini.</p>
                         </div>
 
                         <!-- Col 2: Recent Routes Mini Table -->
@@ -411,7 +422,24 @@
                         </div>
                     </div>
 
-                    <!-- Accordion Section 1: Search -->
+                    <!-- Accordion Section 1a: Search Lokasi -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderSearchLokasi">
+                            <span class="acc-title-text">🔍 Cari Lokasi</span>
+                            <span class="acc-arrow">▶</span>
+                        </button>
+                        <div class="acc-content collapsed" id="accContentSearchLokasi">
+                            <div class="form-group">
+                                <label class="form-label" for="searchLokasiInput">Nama / ID Lokasi</label>
+                                <select class="form-select" id="searchLokasiInput">
+                                    <option value="">— Pilih Lokasi —</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="btnSearchLokasi" style="width: 100%;">Cari Lokasi</button>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Section 1b: Search Rute -->
                     <div class="acc-section">
                         <button class="acc-header" id="accHeaderSearch">
                             <span class="acc-title-text">🔍 Cari Rute</span>

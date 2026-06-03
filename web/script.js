@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleListBtn = document.getElementById('toggleListBtn');
     const toggleMatrixBtn = document.getElementById('toggleMatrixBtn');
     const btnSearch = document.getElementById('btnSearch');
+    const btnSearchLokasi = document.getElementById('btnSearchLokasi');
     const btnDelete = document.getElementById('btnDelete');
     const btnUpdate = document.getElementById('btnUpdate');
     const btnInsertBaru = document.getElementById('btnInsertBaru');
@@ -70,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchAsal = document.getElementById('searchAsal');
     const searchTujuan = document.getElementById('searchTujuan');
+    const searchLokasiInput = document.getElementById('searchLokasiInput');
     const deleteAsal = document.getElementById('deleteAsal');
     const deleteTujuan = document.getElementById('deleteTujuan');
     const updateAsal = document.getElementById('updateAsal');
@@ -104,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Charts state
     let myChart = null;
     let overviewChartInstance = null;
+    let crudChartInstance = null;
     let currentChartOp = 'insert';
 
     // ===================================
@@ -201,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const accs = [
         { header: document.getElementById('accHeaderInsertLokasi'), content: document.getElementById('accContentInsertLokasi') },
         { header: document.getElementById('accHeaderInsertBaru'), content: document.getElementById('accContentInsertBaru') },
+        { header: document.getElementById('accHeaderSearchLokasi'), content: document.getElementById('accContentSearchLokasi') },
         { header: document.getElementById('accHeaderSearch'), content: document.getElementById('accContentSearch') },
         { header: document.getElementById('accHeaderUpdate'), content: document.getElementById('accContentUpdate') },
         { header: document.getElementById('accHeaderDelete'), content: document.getElementById('accContentDelete') }
@@ -561,6 +565,17 @@ document.addEventListener('DOMContentLoaded', () => {
         populateAsal(updateAsal);
         populateAsal(deleteAsal);
         populateAsal(insertBaruAsal);
+        
+        // Populate search lokasi dropdown
+        searchLokasiInput.innerHTML = '<option value="">— Pilih Lokasi —</option>';
+        uniqueSources.forEach(src => {
+            const opt = document.createElement('option');
+            opt.value = src;
+            opt.textContent = src;
+            searchLokasiInput.appendChild(opt);
+        });
+
+        setupDynamicDropdowns();
 
         searchTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
         updateTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
@@ -638,6 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statNodes.textContent = formatNumber(allNodes.length);
         const timeUs = data.waktu_us;
         lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+        updateLiveOperation(6, timeUs);
 
         addLog(`[+] Lokasi ${nama} (${nodeId}) BERHASIL DITAMBAHKAN! | Waktu: ${formatTimeHelper(timeUs)}`);
         showToast(`Lokasi berhasil ditambahkan (${structName})`, "success");
@@ -684,11 +700,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const timeUs = data.waktu_us;
         lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+        updateLiveOperation(7, timeUs);
 
         addLog(`[+] Rute ${asal} → ${tujuan} BERHASIL DITAMBAHKAN! | Waktu: ${formatTimeHelper(timeUs)}`);
         showToast(`Rute berhasil ditambahkan (${structName})`, "success");
         
         insertBaruJarak.value = ''; // clear form
+    });
+
+    // ===================================
+    // Operations: SEARCH LOKASI
+    // ===================================
+    btnSearchLokasi.addEventListener('click', () => {
+        const targetId = searchLokasiInput.value;
+        if (!targetId) {
+            showToast('Pilih lokasi yang ingin dicari!', 'error');
+            return;
+        }
+        if (!window.GraphData || !window.GraphData.isLoaded) {
+            showToast('Muat dataset terlebih dahulu!', 'error');
+            return;
+        }
+
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Mencari lokasi: ${targetId} (via ${structName})...`);
+        const t0 = performance.now();
+
+        const found = allNodes.find(n => n.id === targetId);
+        const t1 = performance.now();
+        const timeUs = (t1 - t0) * 1000;
+        lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+        updateLiveOperation(2, timeUs);
+
+        if (found) {
+            addLog(`[+] Lokasi DITEMUKAN! Tipe: ${found.label} | Waktu: ${formatTimeHelper(timeUs)}`);
+            showToast(`Lokasi ditemukan (${structName})`, 'success');
+
+            btnViewGraph.click();
+            if (network) {
+                network.selectNodes([targetId]);
+                network.focus(targetId, { scale: 1.8, animation: { duration: 600, easingFunction: 'easeInOutQuad' } });
+            }
+        } else {
+            addLog(`[-] Lokasi tidak ditemukan: ${targetId}`);
+            showToast(`Lokasi tidak ditemukan`, 'error');
+        }
     });
 
     // ===================================
@@ -714,6 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const t1 = performance.now();
         const timeUs = (t1 - t0) * 1000;
         lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+        updateLiveOperation(3, timeUs);
 
         if (found) {
             addLog(`[+] Rute DITEMUKAN! Jarak: ${found.label} km | Waktu: ${formatTimeHelper(timeUs)}`);
@@ -768,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const timeUs = data.waktu_us;
             lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+            updateLiveOperation(4, timeUs);
 
             addLog(`[+] Rute ${asal} → ${tujuan} diupdate menjadi ${jarak} km | Waktu: ${formatTimeHelper(timeUs)}`);
             showToast(`Rute berhasil diupdate (${structName})`, "success");
@@ -807,6 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const t1 = performance.now();
             const timeUs = (t1 - t0) * 1000;
             lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+            updateLiveOperation(5, timeUs);
 
             addLog(`[+] Rute ${asal} → ${tujuan} berhasil DIHAPUS! | Waktu: ${formatTimeHelper(timeUs)}`);
             showToast(`Rute berhasil dihapus (${structName})`, 'success');
@@ -1141,47 +1200,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================
     function initOverviewChart() {
         const ctx = document.getElementById('overviewChart').getContext('2d');
+        const ctxCrud = document.getElementById('crudChart').getContext('2d');
         const isLight = document.body.classList.contains('light-theme');
         const gridColor = isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)';
         const tickColor = isLight ? '#475569' : '#94a3b8';
         const labelColor = isLight ? '#0f172a' : '#f1f5f9';
 
+        const commonOptions = {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    color: labelColor,
+                    font: { family: 'JetBrains Mono', size: 10, weight: '600' },
+                    anchor: 'end',
+                    align: 'start',
+                    formatter: function(value, context) {
+                        if (value <= 0) return '';
+                        const formatted = value < 1 ? value.toFixed(3) : value.toFixed(1);
+                        return `${context.dataset.label}: ${formatted}`;
+                    }
+                },
+                legend: {
+                    labels: { color: labelColor, font: { family: 'Inter', weight: '600' } }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'logarithmic',
+                    grid: { color: gridColor },
+                    ticks: { color: tickColor }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    ticks: { color: tickColor }
+                }
+            }
+        };
+
         overviewChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Insert Time (ms)', 'RAM Allocation (MB)'],
+                labels: ['Load Dataset (ms)', 'RAM Terpakai (MB)'],
                 datasets: []
             },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    datalabels: {
-                        color: labelColor,
-                        font: { family: 'JetBrains Mono', size: 10, weight: '600' },
-                        anchor: 'end',
-                        align: 'start',
-                        formatter: function(value, context) {
-                            return value > 0 ? `${context.dataset.label}: ${value.toFixed(1)}` : '';
-                        }
-                    },
-                    legend: {
-                        labels: { color: labelColor, font: { family: 'Inter', weight: '600' } }
-                    }
-                },
-                scales: {
-                    x: {
-                        type: 'logarithmic',
-                        grid: { color: gridColor },
-                        ticks: { color: tickColor }
-                    },
-                    y: {
-                        grid: { color: gridColor },
-                        ticks: { color: tickColor }
-                    }
-                }
-            }
+            options: commonOptions
+        });
+
+        crudChartInstance = new Chart(ctxCrud, {
+            type: 'bar',
+            data: {
+                labels: ['Cari Lokasi (ms)', 'Cari Rute (ms)', 'Update Rute (ms)', 'Hapus Rute (ms)', 'Insert Lokasi (ms)', 'Insert Rute (ms)'],
+                datasets: []
+            },
+            options: commonOptions
         });
     }
 
@@ -1189,7 +1262,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!overviewChartInstance) return;
         
         let bgColor, borderColor;
-        // Generate random alpha for distinct shades of the same color
         let alpha = 0.5 + (Math.random() * 0.4);
         if (struktur === 'list') {
             bgColor = `rgba(129, 140, 248, ${alpha})`;
@@ -1198,22 +1270,59 @@ document.addEventListener('DOMContentLoaded', () => {
             bgColor = `rgba(34, 211, 238, ${alpha})`;
             borderColor = '#22d3ee';
         }
-
-        overviewChartInstance.data.datasets.push({
-            label: `${limitLabel} (${struktur === 'list' ? 'List' : 'Matrix'})`,
-            data: [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0],
-            backgroundColor: bgColor,
-            borderColor: borderColor,
-            borderWidth: 1.5,
-            borderRadius: 4
-        });
+        const dsLabel = `${limitLabel} (${struktur === 'list' ? 'List' : 'Matrix'})`;
         
-        // Keep only the last 8 operations to prevent the chart from getting too crowded
-        if (overviewChartInstance.data.datasets.length > 8) {
-            overviewChartInstance.data.datasets.shift();
+        let existingIndex = overviewChartInstance.data.datasets.findIndex(ds => ds.label === dsLabel);
+        if (existingIndex !== -1) {
+            // Overwrite existing dataset
+            overviewChartInstance.data.datasets[existingIndex].data = [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0];
+        } else {
+            // Add new dataset
+            overviewChartInstance.data.datasets.push({
+                label: dsLabel,
+                data: [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0],
+                backgroundColor: bgColor,
+                borderColor: borderColor,
+                borderWidth: 1.5,
+                borderRadius: 4
+            });
+            
+            if (overviewChartInstance.data.datasets.length > 8) {
+                overviewChartInstance.data.datasets.shift();
+            }
         }
         
         overviewChartInstance.update();
+
+        if (crudChartInstance) {
+            let existingCrudIndex = crudChartInstance.data.datasets.findIndex(ds => ds.label === dsLabel);
+            if (existingCrudIndex !== -1) {
+                // Overwrite existing dataset (clear the CRUD metrics because it's a new benchmark run)
+                crudChartInstance.data.datasets[existingCrudIndex].data = [null, null, null, null, null, null];
+            } else {
+                // Add new dataset
+                crudChartInstance.data.datasets.push({
+                    label: dsLabel,
+                    data: [null, null, null, null, null, null],
+                    backgroundColor: bgColor,
+                    borderColor: borderColor,
+                    borderWidth: 1.5,
+                    borderRadius: 4
+                });
+                if (crudChartInstance.data.datasets.length > 8) {
+                    crudChartInstance.data.datasets.shift();
+                }
+            }
+            crudChartInstance.update();
+        }
+    }
+
+    function updateLiveOperation(opIndex, timeUs) {
+        if (!crudChartInstance || crudChartInstance.data.datasets.length === 0) return;
+        const lastDataset = crudChartInstance.data.datasets[crudChartInstance.data.datasets.length - 1];
+        const mappedIndex = opIndex - 2;
+        lastDataset.data[mappedIndex] = timeUs / 1000.0;
+        crudChartInstance.update();
     }
 
     // ===================================
