@@ -10,14 +10,9 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
 <body>
-    <!-- Ambient Background Effects -->
-    <div class="ambient-bg">
-        <div class="ambient-orb"></div>
-        <div class="ambient-orb"></div>
-        <div class="ambient-orb"></div>
-    </div>
     <div class="grid-pattern"></div>
 
     <div class="dashboard-container">
@@ -132,7 +127,7 @@
                     <div class="dashboard-layout-grid">
                         
                         <!-- Col 1: Overview Chart -->
-                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                        <div class="ui-card" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                 Grafik Uji Cepat Kinerja (Latency List vs Matrix)
@@ -144,7 +139,7 @@
                         </div>
 
                         <!-- Col 2: Recent Routes Mini Table -->
-                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                        <div class="ui-card" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                 Rangkuman Rute Teratas (Edge Preview)
@@ -169,7 +164,7 @@
                         </div>
 
                         <!-- Col 3: Network preview details -->
-                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                        <div class="ui-card" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 5.447-2.724A1 1 0 0121 3.182v10.764a1 1 0 01-.553.894L15 18l-6 2zM9 2v18m6-15v13"/></svg>
                                 Pratinjau Jaringan Graf Rute
@@ -185,7 +180,7 @@
                         </div>
 
                         <!-- Col 4: Mini Logs View -->
-                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                        <div class="ui-card" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
                                 Ringkasan Sistem Log C++
@@ -202,7 +197,7 @@
                    VIEW 2: FULL GRAPH VISUALIZER
                    ============================================ -->
                 <section class="view-section hidden" id="view-graph">
-                    <div class="glass-card viz-panel" style="height: calc(100vh - 180px); min-height: 450px;">
+                    <div class="ui-card viz-panel" style="height: calc(100vh - 180px); min-height: 450px;">
                         <div class="viz-canvas">
                             <div class="sample-badge" id="sampleBadge" style="display: none;">
                                 ⚠️ Sampel Visual: <span id="displayedEdges">0</span> Edge dari <span id="totalEdges">0</span> Total
@@ -212,16 +207,20 @@
                             <!-- Legend -->
                             <div class="viz-legend">
                                 <div class="legend-row">
-                                    <div class="legend-dot" style="background: var(--node-gudang);"></div>
-                                    <span>Gudang (mod 100)</span>
+                                    <div class="legend-dot" style="background: #fbbf24;"></div>
+                                    <span>Gudang</span>
                                 </div>
                                 <div class="legend-row">
-                                    <div class="legend-dot" style="background: var(--node-tujuan);"></div>
+                                    <div class="legend-dot" style="background: #a78bfa;"></div>
+                                    <span>Kantor</span>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="legend-dot" style="background: #3b82f6;"></div>
+                                    <span>Rumah</span>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="legend-dot" style="background: #34d399;"></div>
                                     <span>Tujuan</span>
-                                </div>
-                                <div class="legend-row">
-                                    <div class="legend-dot" style="background: var(--node-road);"></div>
-                                    <span>Road Node</span>
                                 </div>
                             </div>
 
@@ -239,7 +238,7 @@
                    VIEW 3: BENCHMARK ANALYSIS
                    ============================================ -->
                 <section class="view-section hidden" id="view-benchmark">
-                    <div class="glass-card benchmark-section">
+                    <div class="ui-card benchmark-section">
                         <div class="benchmark-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
                             <h3>Analisis Performa Lintas Batas Dataset</h3>
                             <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -273,7 +272,7 @@
                    VIEW 4: DATASET TABLE
                    ============================================ -->
                 <section class="view-section hidden" id="view-table">
-                    <div class="glass-card table-card">
+                    <div class="ui-card table-card">
                         <div class="table-toolbar">
                             <h2 class="table-title">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1.1rem;height:1.1rem;color:var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -317,7 +316,7 @@
                    VIEW 5: CONSOLE LOGS
                    ============================================ -->
                 <section class="view-section hidden" id="view-console">
-                    <div class="glass-card console-card" style="height: calc(100vh - 180px); min-height: 450px; display:flex; flex-direction:column; padding: 0 !important; overflow:hidden;">
+                    <div class="ui-card console-card" style="height: calc(100vh - 180px); min-height: 450px; display:flex; flex-direction:column; padding: 0 !important; overflow:hidden;">
                         <div class="console-header" style="flex-shrink: 0;">
                             <span class="console-dot red"></span>
                             <span class="console-dot yellow"></span>
@@ -337,7 +336,7 @@
         <aside class="right-sidebar">
             
             <!-- Global Config Card -->
-            <div class="glass-card sidebar-card">
+            <div class="ui-card sidebar-card">
                 <h3 class="sidebar-card-title">Pengaturan Graf</h3>
                 <div class="form-group">
                     <label class="form-label">Struktur Data Utama</label>
@@ -350,10 +349,14 @@
                     <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                     Insert Dataset
                 </button>
+                <button class="btn btn-ghost" id="btnRefreshWebsite" style="width: 100%; margin-top: 0.5rem; color: var(--accent-rose); border: 1px solid var(--accent-rose);" title="Mulai ulang semua dari nol">
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Restart Web / Clear All
+                </button>
             </div>
 
             <!-- Operations Card (CRUD - Collapsible Accordion Style) -->
-            <div class="glass-card sidebar-card" style="flex: 1; display:flex; flex-direction:column; min-height: 320px; overflow:hidden; padding: 1.25rem 0.5rem 1.25rem 1.25rem !important;">
+            <div class="ui-card sidebar-card" style="flex: 1; display:flex; flex-direction:column; min-height: 320px; overflow:hidden; padding: 1.25rem 0.5rem 1.25rem 1.25rem !important;">
                 <h3 class="sidebar-card-title" style="padding-right: 0.75rem;">Operasi Rute</h3>
                 
                 <div class="ops-accordion-container" style="flex:1; overflow-y:auto; padding-right: 0.75rem;">
@@ -433,7 +436,7 @@
             </div>
 
             <!-- Inspector Card -->
-            <div class="glass-card sidebar-card" style="height: 220px; display:flex; flex-direction:column; overflow:hidden;">
+            <div class="ui-card sidebar-card" style="height: 220px; display:flex; flex-direction:column; overflow:hidden;">
                 <h3 class="sidebar-card-title">Live Data Inspector</h3>
                 <div class="inspect-content" id="inspectBody" style="flex:1;">
                     <div class="inspect-empty">
@@ -523,6 +526,28 @@
                     <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Muat Dataset
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Out of Memory (OOM) Modal -->
+    <div class="modal-overlay" id="oomModal">
+        <div class="modal-content oom-modal">
+            <div class="oom-header">
+                <div class="oom-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="oom-title">CRITICAL SYSTEM ERROR</h3>
+            </div>
+            <div class="oom-body">
+                <p><strong>OUT OF MEMORY (OOM)</strong></p>
+                <p id="oomDesc">Sistem gagal mengalokasikan memori yang cukup untuk memuat ukuran dataset yang diminta. Struktur data terpilih melebihi kapasitas RAM yang tersedia.</p>
+                <div class="oom-stats">
+                    <span>Status: <strong style="color: var(--accent-rose);">Memory Allocation Failed</strong></span>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 1.5rem; justify-content: center;">
+                <button class="btn btn-danger" id="btnOomReset" style="width: 100%;">Tutup & Reset Sistem</button>
             </div>
         </div>
     </div>

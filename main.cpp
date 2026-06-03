@@ -25,20 +25,23 @@ inline string getJsonStringValue(const string& json, const string& key) {
     if (pos == string::npos) return "";
     size_t colon = json.find(":", pos);
     if (colon == string::npos) return "";
-    size_t start_quote = json.find("\"", colon);
-    if (start_quote == string::npos) {
-        size_t next_comma = json.find(",", colon);
-        size_t next_brace = json.find("}", colon);
+    
+    size_t val_start = json.find_first_not_of(" \t\r\n", colon + 1);
+    if (val_start == string::npos) return "";
+
+    if (json[val_start] == '\"') {
+        size_t end_quote = json.find("\"", val_start + 1);
+        if (end_quote == string::npos) return "";
+        return json.substr(val_start + 1, end_quote - val_start - 1);
+    } else {
+        size_t next_comma = json.find(",", val_start);
+        size_t next_brace = json.find("}", val_start);
         size_t end_pos = (next_comma != string::npos && next_comma < next_brace) ? next_comma : next_brace;
         if (end_pos == string::npos) return "";
-        string val = json.substr(colon + 1, end_pos - colon - 1);
-        val.erase(0, val.find_first_not_of(" \t\r\n"));
+        string val = json.substr(val_start, end_pos - val_start);
         val.erase(val.find_last_not_of(" \t\r\n") + 1);
         return val;
     }
-    size_t end_quote = json.find("\"", start_quote + 1);
-    if (end_quote == string::npos) return "";
-    return json.substr(start_quote + 1, end_quote - start_quote - 1);
 }
 
 inline double getJsonDoubleValue(const string& json, const string& key) {
@@ -282,6 +285,17 @@ int main()
             vector<Rute> listRute;
             loadDimacsData(mapLokasi, listRute, limit);
 
+            if (struktur == "list") {
+                unordered_map<string, Lokasi>().swap(graf_list.daftar_lokasi);
+                unordered_map<string, vector<Rute>>().swap(graf_list.daftar_rute);
+            } else {
+                unordered_map<string, Lokasi>().swap(graf_matrix.daftar_lokasi);
+                unordered_map<string, int>().swap(graf_matrix.lokasi_ke_index);
+                vector<string>().swap(graf_matrix.index_ke_lokasi);
+                vector<vector<Rute>>().swap(graf_matrix.matrix_rute);
+                graf_matrix.jumlah_lokasi = 0;
+            }
+
             double ram_sebelum = get_current_ram_usage_mb();
             
             PerformanceTimer p_timer;
@@ -292,16 +306,9 @@ int main()
 
             try {
                 if (struktur == "list") {
-                    graf_list.daftar_lokasi.clear();
-                    graf_list.daftar_rute.clear();
                     for (auto& pair : mapLokasi) graf_list.masuk_lokasi(pair.second);
                     for (auto& rute : listRute) graf_list.masuk_rute(rute);
                 } else {
-                    graf_matrix.daftar_lokasi.clear();
-                    graf_matrix.lokasi_ke_index.clear();
-                    graf_matrix.index_ke_lokasi.clear();
-                    graf_matrix.matrix_rute.clear();
-                    graf_matrix.jumlah_lokasi = 0;
                     for (auto& pair : mapLokasi) graf_matrix.masuk_lokasi(pair.second);
                     graf_matrix.alokasi_memori_matrix();
                     for (auto& rute : listRute) graf_matrix.masuk_rute(rute);

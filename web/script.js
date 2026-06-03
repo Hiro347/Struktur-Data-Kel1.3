@@ -2,6 +2,9 @@
 // Modernized Dashboard Controller with Dynamic Tab Router & Dual Theme Support
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Register global ChartJS plugins
+    Chart.register(ChartDataLabels);
+
     // ===================================
     // DOM Navigation References (Zone 1)
     // ===================================
@@ -27,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Controls & UI Elements
     // ===================================
     const btnInsertDataset = document.getElementById('btnInsertDataset');
+    const btnRefreshWebsite = document.getElementById('btnRefreshWebsite');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const toast = document.getElementById('toast');
@@ -124,9 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return num.toString();
     }
 
+    function formatTimeHelper(us) {
+        if (us < 1000) return `${us.toFixed(1)} µs`;
+        if (us < 1000000) return `${(us / 1000).toFixed(2)} ms`;
+        return `${(us / 1000000).toFixed(2)} s`;
+    }
+
     async function safeFetch(url, options = {}) {
         const controller = new AbortController();
-        const timeoutId  = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        // Tingkatkan timeout menjadi 5 menit (300000 ms) untuk dataset puluhan juta
+        const timeout = options.timeout || 300000; 
+        const timeoutId  = setTimeout(() => controller.abort(), timeout);
         
         try {
             const res = await fetch(url, { ...options, signal: controller.signal });
@@ -134,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return res;
         } catch (err) {
             clearTimeout(timeoutId);
-            addLog(`[-] Server tidak merespons: ${url}`);
-            showToast("C++ Server offline. Menggunakan fallback lokal.", "warning");
+            addLog(`[-] Request Timeout atau Server terputus: ${url}`);
+            showToast("Proses terlalu lama atau server offline.", "warning");
             return null;
         }
     }
@@ -259,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================
     const handleStructSelect = (type) => {
         currentStruktur = type;
+        const structName = type === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
         if (type === 'list') {
             toggleListBtn.classList.add('active');
             toggleMatrixBtn.classList.remove('active');
@@ -267,6 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleMatrixBtn.classList.add('active');
             toggleListBtn.classList.remove('active');
             addLog('Struktur Aktif → Adjacency Matrix (Lookup cepat O(1))');
+        }
+        
+        // Update header indicator if a dataset is already loaded
+        if (window.GraphData && window.GraphData.isLoaded) {
+            const currentText = statusText.textContent.split('(')[0].trim();
+            statusText.textContent = `${currentText} (${structName})`;
         }
     };
     toggleListBtn.addEventListener('click', () => handleStructSelect('list'));
@@ -278,8 +297,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal() { datasetModal.classList.add('visible'); }
     function closeModal() { datasetModal.classList.remove('visible'); }
     btnInsertDataset.addEventListener('click', openModal);
+    if (btnRefreshWebsite) btnRefreshWebsite.addEventListener('click', () => location.reload());
     modalCancel.addEventListener('click', closeModal);
     datasetModal.addEventListener('click', (e) => { if (e.target === datasetModal) closeModal(); });
+
+    // ===================================
+    // OOM Modal Logic
+    // ===================================
+    const oomModal = document.getElementById('oomModal');
+    const btnOomReset = document.getElementById('btnOomReset');
+    function showOOMWarning() {
+        if (oomModal) {
+            oomModal.classList.add('visible');
+            closeModal();
+            addLog("[-] CRITICAL: OUT OF MEMORY (OOM) ENCOUNTERED!");
+            showToast("Out of Memory!", "error");
+        }
+    }
+    function hideOOMWarning() {
+        if (oomModal) oomModal.classList.remove('visible');
+        location.reload();
+    }
+    if (btnOomReset) btnOomReset.addEventListener('click', hideOOMWarning);
+    window.triggerOOM = showOOMWarning;
+
 
     datasetOptions.forEach(opt => {
         opt.addEventListener('click', () => {
@@ -332,10 +373,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const benchRes = await safeFetch('/api/benchmark', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ limit: benchmarkLimit, struktur: currentStruktur })
+                    body: JSON.stringify({ limit: benchmarkLimit, struktur: currentStruktur }),
+                    timeout: 300000 // 5 menit
                 });
-                if (benchRes && benchRes.ok) {
-                    benchData = await benchRes.json();
+                
+                if (!benchRes || !benchRes.ok) {
+                    throw new Error('Gagal mengeksekusi benchmark di server (Timeout/Offline)');
+                }
+                
+                benchData = await benchRes.json();
+                if (benchData.ram_mb < 0) {
+                    showOOMWarning();
+                    btnInsertDataset.innerHTML = 'Muat Dataset';
+                    btnInsertDataset.disabled = false;
+                    return;
                 }
 
             }
@@ -350,7 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 3. Update status displays
             statusDot.classList.add('active');
-            statusText.textContent = `Dataset Aktif — ${limitLabel}`;
+            const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+            statusText.textContent = `Dataset Aktif — ${limitLabel} (${structName})`;
             statusText.style.color = 'var(--accent-emerald)';
 
             btnInsertDataset.innerHTML = `
@@ -381,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statMemory.textContent = benchData.ram_mb > 0 ? `~${benchData.ram_mb.toFixed(2)} MB` : '—';
             
             const lastTimeUs = benchData.waktu_ms * 1000;
-            lastOpTimeVal.textContent = lastTimeUs > 0 ? `${lastTimeUs.toFixed(0)} µs` : '—';
+            lastOpTimeVal.textContent = lastTimeUs > 0 ? formatTimeHelper(lastTimeUs) : '—';
 
             // 5. Paginated edge data table rendering
             currentPage = 1;
@@ -397,13 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
             drawGraphVis(animData);
 
             // 9. Update Overview Dashboard Chart
-            if (currentStruktur === 'list') {
-                updateOverviewChart(benchData.waktu_ms, null, benchData.ram_mb, null);
-            } else {
-                updateOverviewChart(null, benchData.waktu_ms, null, benchData.ram_mb);
-            }
+            updateOverviewChart(limitLabel, currentStruktur, benchData.waktu_ms, benchData.ram_mb);
 
-            addLog(`[+] Sukses memproses dataset! Waktu: ${benchData.waktu_ms.toFixed(2)} ms, RAM: ${benchData.ram_mb.toFixed(2)} MB`);
+            addLog(`[+] Sukses memproses dataset! Waktu: ${formatTimeHelper(benchData.waktu_ms * 1000)}, RAM: ${benchData.ram_mb.toFixed(2)} MB`);
             addLog(`═══════════════════════════════════════════`);
             showToast(`Dataset ${limitLabel} berhasil dimuat!`, 'success');
 
@@ -543,17 +591,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        addLog(`Mencari rute: ${asal} → ${tujuan}...`);
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Mencari rute: ${asal} → ${tujuan} (via ${structName})...`);
         const t0 = performance.now();
 
         const found = allEdges.find(e => e.from === asal && e.to === tujuan);
         const t1 = performance.now();
         const timeUs = (t1 - t0) * 1000;
-        lastOpTimeVal.textContent = `${timeUs.toFixed(1)} µs`;
+        lastOpTimeVal.textContent = formatTimeHelper(timeUs);
 
         if (found) {
-            addLog(`[+] Rute DITEMUKAN! Jarak: ${found.label} km | Waktu: ${timeUs.toFixed(1)} µs`);
-            showToast(`Rute ditemukan: Jarak ${found.label} km`, 'success');
+            addLog(`[+] Rute DITEMUKAN! Jarak: ${found.label} km | Waktu: ${formatTimeHelper(timeUs)}`);
+            showToast(`Rute ditemukan (${structName})`, 'success');
 
             // Open full graph tab and focus
             btnViewGraph.click();
@@ -583,7 +632,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        addLog(`Mengupdate rute: ${asal} → ${tujuan} menjadi ${jarak} km...`);
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Mengupdate rute: ${asal} → ${tujuan} menjadi ${jarak} km (via ${structName})...`);
 
         const res = await safeFetch('/api/update', {
             method: 'POST',
@@ -602,10 +652,10 @@ document.addEventListener('DOMContentLoaded', () => {
             drawGraphVis({ nodes: allNodes, edges: allEdges });
 
             const timeUs = data.waktu_us;
-            lastOpTimeVal.textContent = `${timeUs.toFixed(0)} µs`;
+            lastOpTimeVal.textContent = formatTimeHelper(timeUs);
 
-            addLog(`[+] Rute ${asal} → ${tujuan} diupdate menjadi ${jarak} km | Waktu: ${timeUs.toFixed(0)} µs`);
-            showToast("Rute berhasil diupdate!", "success");
+            addLog(`[+] Rute ${asal} → ${tujuan} diupdate menjadi ${jarak} km | Waktu: ${formatTimeHelper(timeUs)}`);
+            showToast(`Rute berhasil diupdate (${structName})`, "success");
         } else {
             addLog(`[-] Rute tidak ditemukan di visualisasi cache: ${asal} → ${tujuan}`);
             showToast("Rute tidak ditemukan di visualisasi", "error");
@@ -627,7 +677,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        addLog(`Menghapus rute: ${asal} → ${tujuan}...`);
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Menghapus rute: ${asal} → ${tujuan} (via ${structName})...`);
         const t0 = performance.now();
 
         const idx = allEdges.findIndex(e => e.from === asal && e.to === tujuan);
@@ -640,10 +691,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const t1 = performance.now();
             const timeUs = (t1 - t0) * 1000;
-            lastOpTimeVal.textContent = `${timeUs.toFixed(1)} µs`;
+            lastOpTimeVal.textContent = formatTimeHelper(timeUs);
 
-            addLog(`[+] Rute ${asal} → ${tujuan} berhasil DIHAPUS! | Waktu: ${timeUs.toFixed(1)} µs`);
-            showToast(`Rute berhasil dihapus`, 'success');
+            addLog(`[+] Rute ${asal} → ${tujuan} berhasil DIHAPUS! | Waktu: ${formatTimeHelper(timeUs)}`);
+            showToast(`Rute berhasil dihapus (${structName})`, 'success');
 
             drawGraphVis({ nodes: allNodes, edges: allEdges });
         } else {
@@ -765,6 +816,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 parsing: false,
                 normalized: true,
                 plugins: {
+                    datalabels: {
+                        color: labelColor,
+                        font: { family: 'JetBrains Mono', size: 10, weight: '600' },
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: function(value, context) {
+                            const datasetLabel = context.dataset.label;
+                            const sizeLabel = context.chart.data.labels[context.dataIndex];
+                            if (datasetLabel === 'Adjacency Matrix' && results[context.dataIndex].matrix.ram_mb < 0) {
+                                return 'OOM';
+                            }
+                            return value > 0 ? `${sizeLabel} Dataset: ${value.toFixed(1)} ${unit}` : '';
+                        }
+                    },
                     legend: {
                         labels: { color: labelColor, font: { family: 'Inter', weight: '600' } }
                     },
@@ -840,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
         box.innerHTML = `
             <strong>Analisis Otomatis (Evaluasi pada Skala ${limitStr} Edges):</strong>
             <ul style="margin-left: 1.25rem; margin-top: 0.4rem; list-style-type: square;">
-                <li><strong>Pencarian Rute (Search)</strong>: Adjacency Matrix <strong>${searchRatio}× lebih cepat</strong> dibanding Adjacency List (${item.matrix.search_us.toFixed(2)} µs vs ${item.list.search_us.toFixed(2)} µs) karena lookup kompleksitas $O(1)$ dibanding Adjacency List $O(\\text{degree})$.</li>
+                <li><strong>Pencarian Rute (Search)</strong>: Adjacency Matrix <strong>${searchRatio}× lebih cepat</strong> dibanding Adjacency List (${formatTimeHelper(item.matrix.search_us)} vs ${formatTimeHelper(item.list.search_us)}) karena lookup kompleksitas $O(1)$ dibanding Adjacency List $O(\\text{degree})$.</li>
                 <li><strong>Konsumsi RAM</strong>: Adjacency Matrix memerlukan <strong>${ramRatio}× lebih banyak RAM</strong> (${item.matrix.ram_mb.toFixed(1)} MB vs ${item.list.ram_mb.toFixed(1)} MB) akibat alokasi matriks 2D.</li>
             </ul>
             ${matrixOOMWarning}
@@ -860,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return {
                 id: n.id,
-                label: n.id.replace('Lokasi_', 'N-') + '\n' + n.group,
+                label: n.group,
                 group: n.group,
                 color: {
                     background: color,
@@ -970,30 +1035,22 @@ document.addEventListener('DOMContentLoaded', () => {
             type: 'bar',
             data: {
                 labels: ['Insert Time (ms)', 'RAM Allocation (MB)'],
-                datasets: [
-                    {
-                        label: 'Adjacency List',
-                        data: [0, 0],
-                        backgroundColor: 'rgba(129, 140, 248, 0.7)',
-                        borderColor: '#818cf8',
-                        borderWidth: 1.5,
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Adjacency Matrix',
-                        data: [0, 0],
-                        backgroundColor: 'rgba(34, 211, 238, 0.7)',
-                        borderColor: '#22d3ee',
-                        borderWidth: 1.5,
-                        borderRadius: 4
-                    }
-                ]
+                datasets: []
             },
             options: {
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    datalabels: {
+                        color: labelColor,
+                        font: { family: 'JetBrains Mono', size: 10, weight: '600' },
+                        anchor: 'end',
+                        align: 'start',
+                        formatter: function(value, context) {
+                            return value > 0 ? `${context.dataset.label}: ${value.toFixed(1)}` : '';
+                        }
+                    },
                     legend: {
                         labels: { color: labelColor, font: { family: 'Inter', weight: '600' } }
                     }
@@ -1013,14 +1070,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateOverviewChart(listInsertMs, matrixInsertMs, listRamMb, matrixRamMb) {
+    function updateOverviewChart(limitLabel, struktur, insertMs, ramMb) {
         if (!overviewChartInstance) return;
-        if (listInsertMs !== null && listRamMb !== null) {
-            overviewChartInstance.data.datasets[0].data = [listInsertMs, listRamMb];
+        
+        let bgColor, borderColor;
+        // Generate random alpha for distinct shades of the same color
+        let alpha = 0.5 + (Math.random() * 0.4);
+        if (struktur === 'list') {
+            bgColor = `rgba(129, 140, 248, ${alpha})`;
+            borderColor = '#818cf8';
+        } else {
+            bgColor = `rgba(34, 211, 238, ${alpha})`;
+            borderColor = '#22d3ee';
         }
-        if (matrixInsertMs !== null && matrixRamMb !== null) {
-            overviewChartInstance.data.datasets[1].data = [matrixInsertMs >= 0 ? matrixInsertMs : 0, matrixRamMb >= 0 ? matrixRamMb : 0];
+
+        overviewChartInstance.data.datasets.push({
+            label: `${limitLabel} (${struktur === 'list' ? 'List' : 'Matrix'})`,
+            data: [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0],
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            borderWidth: 1.5,
+            borderRadius: 4
+        });
+        
+        // Keep only the last 8 operations to prevent the chart from getting too crowded
+        if (overviewChartInstance.data.datasets.length > 8) {
+            overviewChartInstance.data.datasets.shift();
         }
+        
         overviewChartInstance.update();
     }
 

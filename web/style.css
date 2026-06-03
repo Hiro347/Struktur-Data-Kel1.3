@@ -5,12 +5,12 @@
    ============================================ */
 :root {
     /* Base Color Tokens (Dark Mode Default) */
-    --bg-base: #06060a;
-    --bg-sidebar: rgba(10, 10, 16, 0.9);
-    --bg-surface: rgba(14, 14, 22, 0.72);
-    --bg-surface-hover: rgba(22, 22, 35, 0.85);
-    --bg-elevated: rgba(24, 24, 40, 0.6);
-    --bg-input: rgba(8, 8, 16, 0.5);
+    --bg-base: #0f0f13;
+    --bg-sidebar: #16161e;
+    --bg-surface: #1a1a24;
+    --bg-surface-hover: #222230;
+    --bg-elevated: #282838;
+    --bg-input: #12121a;
 
     /* Accent Palette */
     --accent-indigo: #818cf8;
@@ -45,9 +45,8 @@
     --border-strong: rgba(255, 255, 255, 0.18);
 
     /* Shadow and Blurring */
-    --glass-blur: blur(20px);
-    --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.4);
-    --shadow-glow-indigo: 0 0 40px rgba(129, 140, 248, 0.12);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-glow-indigo: 0 4px 16px rgba(129, 140, 248, 0.15);
     
     /* Layout Variables */
     --radius-sm: 6px;
@@ -63,12 +62,12 @@
 
 /* Light Theme Variables Override */
 .light-theme {
-    --bg-base: #f1f5f9;
-    --bg-sidebar: rgba(255, 255, 255, 0.95);
-    --bg-surface: rgba(255, 255, 255, 0.85);
-    --bg-surface-hover: rgba(241, 245, 249, 0.95);
-    --bg-elevated: rgba(255, 255, 255, 0.98);
-    --bg-input: rgba(255, 255, 255, 0.9);
+    --bg-base: #f4f6f8;
+    --bg-sidebar: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f8fafc;
+    --bg-elevated: #ffffff;
+    --bg-input: #f1f5f9;
 
     /* Text Tones */
     --text-primary: #0f172a;
@@ -96,8 +95,8 @@
     --border-strong: rgba(0, 0, 0, 0.15);
 
     /* Soft light shadow */
-    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 8px -1px rgba(15, 23, 42, 0.03);
-    --shadow-glow-indigo: 0 0 40px rgba(79, 70, 229, 0.05);
+    --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.06);
+    --shadow-glow-indigo: 0 2px 10px rgba(79, 70, 229, 0.1);
 }
 
 /* ============================================
@@ -138,52 +137,7 @@ body {
     background: var(--accent-indigo-glow);
 }
 
-/* Ambient Background (Only visual in dark) */
-.ambient-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-    transition: opacity 0.5s;
-}
-.light-theme .ambient-bg {
-    opacity: 0.15;
-}
-.ambient-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.15;
-    animation: orbPulse 10s ease-in-out infinite;
-}
-.ambient-orb:nth-child(1) {
-    width: 600px;
-    height: 600px;
-    top: -10%;
-    left: -5%;
-    background: radial-gradient(circle, var(--accent-indigo) 0%, transparent 70%);
-}
-.ambient-orb:nth-child(2) {
-    width: 500px;
-    height: 500px;
-    bottom: -10%;
-    right: -5%;
-    background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
-    animation-delay: 3s;
-}
-.ambient-orb:nth-child(3) {
-    width: 350px;
-    height: 350px;
-    top: 35%;
-    left: 45%;
-    background: radial-gradient(circle, var(--accent-violet) 0%, transparent 70%);
-    animation-delay: 5s;
-}
-@keyframes orbPulse {
-    0%, 100% { opacity: 0.1; transform: scale(1) translate(0, 0); }
-    50% { opacity: 0.22; transform: scale(1.08) translate(20px, -20px); }
-}
+/* Ambient Background (Removed) */
 
 .grid-pattern {
     position: fixed;
@@ -222,7 +176,6 @@ body {
     justify-content: space-between;
     height: 100vh;
     overflow-y: auto;
-    backdrop-filter: var(--glass-blur);
     z-index: 100;
     transition: background 0.3s, border-color 0.3s;
 }
@@ -388,7 +341,6 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
-    backdrop-filter: var(--glass-blur);
     z-index: 90;
     transition: background 0.3s, border-color 0.3s;
 }
@@ -607,19 +559,22 @@ body {
 }
 
 /* ============================================
-   GLASS CARD CONTAINER
+   UI CARD CONTAINER
    ============================================ */
-.glass-card {
+.ui-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 1.25rem;
-    backdrop-filter: var(--glass-blur);
     box-shadow: var(--shadow-card);
-    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, transform 0.3s;
 }
-.glass-card:hover {
+.ui-card:hover {
     border-color: var(--border-default);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.light-theme .ui-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 .card-header {
     display: flex;
@@ -672,7 +627,6 @@ body {
     border-radius: var(--radius-md);
     font-size: 0.7rem;
     font-weight: 600;
-    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     gap: 0.35rem;
@@ -700,7 +654,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px);
     transition: all 0.2s;
 }
 .viz-btn:hover {
@@ -715,7 +668,6 @@ body {
     bottom: 0.75rem;
     left: 0.75rem;
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
     padding: 0.55rem 0.8rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
@@ -803,7 +755,6 @@ body {
     gap: 1.25rem;
     height: 100vh;
     overflow-y: auto;
-    backdrop-filter: var(--glass-blur);
     z-index: 100;
     transition: background 0.3s, border-color 0.3s;
 }
@@ -1225,7 +1176,6 @@ tr:hover td {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(6px);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -1245,7 +1195,6 @@ tr:hover td {
     padding: 1.75rem;
     width: 95%;
     max-width: 500px;
-    backdrop-filter: blur(20px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), var(--shadow-glow-indigo);
     transform: translateY(15px) scale(0.98);
     transition: transform 0.3s var(--ease-spring);
@@ -1389,4 +1338,60 @@ tr:hover td {
     .kpi-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ============================================
+   OOM MODAL (CRITICAL ERROR)
+   ============================================ */
+.oom-modal {
+    border-top: 4px solid var(--accent-rose) !important;
+    max-width: 450px !important;
+    text-align: center;
+}
+.oom-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.oom-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-rose-dim);
+    color: var(--accent-rose);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.oom-icon svg {
+    width: 28px;
+    height: 28px;
+}
+.oom-title {
+    color: var(--accent-rose);
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+}
+.oom-body {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.oom-body strong {
+    color: var(--text-primary);
+}
+.oom-stats {
+    margin-top: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-subtle);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+}
+.light-theme .oom-stats {
+    background: rgba(255, 255, 255, 0.5);
 }

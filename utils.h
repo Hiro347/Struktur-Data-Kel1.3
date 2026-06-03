@@ -146,13 +146,19 @@ inline void loadDimacsData(std::unordered_map<std::string, Lokasi>& mapLokasi,
         std::string id_origin = "Lokasi_" + std::to_string(origin);
         std::string id_dest = "Lokasi_" + std::to_string(dest);
 
-        // Aturan penamaan & tipe sesuai dokumen spesifikasi (Modulo 100)
+        auto get_tipe = [](int id) -> std::string {
+            if (id % 15 == 0) return "Gudang";
+            if (id % 8 == 0) return "Kantor";
+            if (id % 3 == 0) return "Rumah";
+            return "Tujuan";
+        };
+
         if (mapLokasi.find(id_origin) == mapLokasi.end()) {
-            mapLokasi[id_origin] = {id_origin, id_origin, (origin % 100 == 0) ? "Gudang" : "Tujuan"};
+            mapLokasi[id_origin] = {id_origin, id_origin, get_tipe(origin)};
         }
 
         if (mapLokasi.find(id_dest) == mapLokasi.end()) {
-            mapLokasi[id_dest] = {id_dest, id_dest, (dest % 100 == 0) ? "Gudang" : "Tujuan"};
+            mapLokasi[id_dest] = {id_dest, id_dest, get_tipe(dest)};
         }
 
         // Simpan objek rute ke dalam list
