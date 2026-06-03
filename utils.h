@@ -165,9 +165,9 @@ inline void loadDimacsData(std::unordered_map<std::string, Lokasi>& mapLokasi,
         }
     }
     file.close();
-    std::cout << "[+] Sukses memuat data ke memori!\n";
-    std::cout << "    -> Total Node (Lokasi Unik) Berhasil Dibuat: " << mapLokasi.size() << "\n";
-    std::cout << "    -> Total Edge (Rute) Berhasil Dibuat: " << listRute.size() << "\n";
+    std::cout << "[+] Berhasil membaca (parsing) dataset dari file ke variabel sementara!\n";
+    std::cout << "    -> Total Node (Lokasi Unik) Ditemukan: " << mapLokasi.size() << "\n";
+    std::cout << "    -> Total Edge (Rute) Ditemukan: " << listRute.size() << "\n";
 }
 
 #endif

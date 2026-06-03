@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iomanip>
 #include "utils.h"
 #include "Adjacency_List.h"
 #include "Adjacency_Matrix.h"
@@ -482,29 +483,35 @@ int main()
         {
             int opsi_kapasitas;
             cout << "\n=== PILIH KAPASITAS DATASET (BERDASARKAN EDGES / RUTE) ===" << endl;
-            cout << "1. 100 Ribu Edges (Rute)" << endl;
-            cout << "2. 500 Ribu Edges (Rute)" << endl;
-            cout << "3. 1 Juta Edges (Rute)" << endl;
-            cout << "4. 10 Juta Edges (Rute)" << endl;
-            cout << "5. 20 Juta Edges (Rute)" << endl;
-            cout << "6. Gunakan CSV Dummy (lokasi.csv & rute.csv)" << endl;
-            cout << "Pilih opsi (1-6): ";
+            cout << "1. 1.000 Edges (Rute)" << endl;
+            cout << "2. 5.000 Edges (Rute)" << endl;
+            cout << "3. 10.000 Edges (Rute)" << endl;
+            cout << "4. 100 Ribu Edges (Rute)" << endl;
+            cout << "5. 500 Ribu Edges (Rute)" << endl;
+            cout << "6. 1 Juta Edges (Rute)" << endl;
+            cout << "7. 10 Juta Edges (Rute)" << endl;
+            cout << "8. 20 Juta Edges (Rute)" << endl;
+            cout << "9. Gunakan CSV Dummy (lokasi.csv & rute.csv)" << endl;
+            cout << "Pilih opsi (1-9): ";
             cin >> opsi_kapasitas;
 
             unordered_map<string, Lokasi> data_lokasi;
             vector<Rute> data_rute;
 
-            if (opsi_kapasitas >= 1 && opsi_kapasitas <= 5) {
+            if (opsi_kapasitas >= 1 && opsi_kapasitas <= 8) {
                 int limit_edges = 0;
-                if (opsi_kapasitas == 1) limit_edges = 100000;
-                else if (opsi_kapasitas == 2) limit_edges = 500000;
-                else if (opsi_kapasitas == 3) limit_edges = 1000000;
-                else if (opsi_kapasitas == 4) limit_edges = 10000000;
-                else if (opsi_kapasitas == 5) limit_edges = 20000000;
+                if (opsi_kapasitas == 1) limit_edges = 1000;
+                else if (opsi_kapasitas == 2) limit_edges = 5000;
+                else if (opsi_kapasitas == 3) limit_edges = 10000;
+                else if (opsi_kapasitas == 4) limit_edges = 100000;
+                else if (opsi_kapasitas == 5) limit_edges = 500000;
+                else if (opsi_kapasitas == 6) limit_edges = 1000000;
+                else if (opsi_kapasitas == 7) limit_edges = 10000000;
+                else if (opsi_kapasitas == 8) limit_edges = 20000000;
 
                 loadDimacsData(data_lokasi, data_rute, limit_edges);
             }
-            else if (opsi_kapasitas == 6) {
+            else if (opsi_kapasitas == 9) {
                 data_lokasi = loadLokasi("lokasi.csv");
                 data_rute = loadRute("rute.csv");
             }
@@ -571,7 +578,8 @@ int main()
             if (ram_penggunaan < 0) ram_penggunaan = 0.0;
 
             cout << "\n[+] Waktu untuk Insert (" << nama_struktur << "): " << waktu << " mikrodetik" << endl;
-            cout << "[+] Penggunaan RAM saat Insert: " << ram_penggunaan << " MB" << endl;
+            cout << "[+] Penggunaan RAM saat Insert: " << fixed << setprecision(2) << ram_penggunaan << " MB" << endl;
+            cout << defaultfloat;
         }
         else if (pilihan == 2)
         {
