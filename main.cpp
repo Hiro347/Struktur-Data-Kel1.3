@@ -557,7 +557,7 @@ int main()
                     data_matrix_masuk = true;
                 } catch (const std::exception& e) {
                     cout << "\n[!] ERROR: Gagal alokasi matriks (" << e.what() << ")" << endl;
-                    cout << "[!] Adjacency Matrix dibatasi maks 5000 lokasi karena kompleksitas O(V^2)." << endl;
+                    cout << "[!] Memori RAM tidak mencukupi untuk alokasi Adjacency Matrix (O(V^2))." << endl;
                     continue;
                 } catch (...) {
                     cout << "\n[!] ERROR: Gagal alokasi memori (Out Of Memory)" << endl;

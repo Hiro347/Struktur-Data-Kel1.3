@@ -33,18 +33,52 @@ public:
     // Mengalokasikan matriks 2D sekaligus (Batch Allocation)
     void alokasi_memori_matrix()
     {
-        if (jumlah_lokasi > 5000)
+        long long sizeof_rute = sizeof(Rute);
+        long long sizeof_vector = sizeof(std::vector<Rute>);
+        long long estimated_bytes = (long long)jumlah_lokasi * sizeof_vector + 
+                                    (long long)jumlah_lokasi * (long long)jumlah_lokasi * sizeof_rute;
+
+        // Ambil info memori sistem menggunakan API Windows
+        MEMORYSTATUSEX statex;
+        statex.dwLength = sizeof(statex);
+        if (GlobalMemoryStatusEx(&statex))
         {
-            throw std::bad_alloc();
-        }
-        matrix_rute.resize(jumlah_lokasi);
-        for (int i = 0; i < jumlah_lokasi; i++)
-        {
-            matrix_rute[i].resize(jumlah_lokasi);
-            for (int j = 0; j < jumlah_lokasi; j++)
+            // Ambil RAM fisik yang tersedia (ullAvailPhys)
+            // Sebagai batas aman, kita batasi alokasi maksimal 85% dari RAM fisik yang tersedia
+            // untuk menghindari thrashing dan menjaga kestabilitas OS.
+            unsigned long long max_allowed_bytes = (statex.ullAvailPhys * 85) / 100;
+            
+            if (estimated_bytes > max_allowed_bytes)
             {
-                matrix_rute[i][j].jarak_km = -1.0;
+                throw std::bad_alloc();
             }
+        }
+        else
+        {
+            // Fallback jika API gagal, gunakan batas aman statis 5000 lokasi
+            if (jumlah_lokasi > 5000)
+            {
+                throw std::bad_alloc();
+            }
+        }
+
+        try
+        {
+            matrix_rute.resize(jumlah_lokasi);
+            for (int i = 0; i < jumlah_lokasi; i++)
+            {
+                matrix_rute[i].resize(jumlah_lokasi);
+                for (int j = 0; j < jumlah_lokasi; j++)
+                {
+                    matrix_rute[i][j].jarak_km = -1.0;
+                }
+            }
+        }
+        catch (...)
+        {
+            // Bersihkan memori yang sempat dialokasikan sebagian
+            std::vector<std::vector<Rute>>().swap(matrix_rute);
+            throw; // Re-throw agar ditangkap di pemanggil
         }
     }
 
