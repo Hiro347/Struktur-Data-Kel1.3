@@ -1,3 +1,6 @@
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
 #include <iostream>
 #include <vector>
 #include <string>
@@ -283,20 +286,31 @@ int main()
             PerformanceTimer p_timer;
             p_timer.start();
 
-            if (struktur == "list") {
-                graf_list.daftar_lokasi.clear();
-                graf_list.daftar_rute.clear();
-                for (auto& pair : mapLokasi) graf_list.masuk_lokasi(pair.second);
-                for (auto& rute : listRute) graf_list.masuk_rute(rute);
-            } else {
-                graf_matrix.daftar_lokasi.clear();
-                graf_matrix.lokasi_ke_index.clear();
-                graf_matrix.index_ke_lokasi.clear();
-                graf_matrix.matrix_rute.clear();
-                graf_matrix.jumlah_lokasi = 0;
-                for (auto& pair : mapLokasi) graf_matrix.masuk_lokasi(pair.second);
-                graf_matrix.alokasi_memori_matrix();
-                for (auto& rute : listRute) graf_matrix.masuk_rute(rute);
+            bool success = true;
+            string error_msg = "";
+
+            try {
+                if (struktur == "list") {
+                    graf_list.daftar_lokasi.clear();
+                    graf_list.daftar_rute.clear();
+                    for (auto& pair : mapLokasi) graf_list.masuk_lokasi(pair.second);
+                    for (auto& rute : listRute) graf_list.masuk_rute(rute);
+                } else {
+                    graf_matrix.daftar_lokasi.clear();
+                    graf_matrix.lokasi_ke_index.clear();
+                    graf_matrix.index_ke_lokasi.clear();
+                    graf_matrix.matrix_rute.clear();
+                    graf_matrix.jumlah_lokasi = 0;
+                    for (auto& pair : mapLokasi) graf_matrix.masuk_lokasi(pair.second);
+                    graf_matrix.alokasi_memori_matrix();
+                    for (auto& rute : listRute) graf_matrix.masuk_rute(rute);
+                }
+            } catch (const std::exception& e) {
+                success = false;
+                error_msg = e.what();
+            } catch (...) {
+                success = false;
+                error_msg = "std::bad_alloc";
             }
 
             double waktu_us = p_timer.stop();
@@ -305,7 +319,12 @@ int main()
             double diff_ram = ram_sesudah - ram_sebelum;
             if (diff_ram < 0) diff_ram = 0;
 
-            string resp = "{\"waktu_ms\": " + to_string(waktu_us / 1000.0) + ", \"ram_mb\": " + to_string(diff_ram) + "}";
+            string resp;
+            if (success) {
+                resp = "{\"waktu_ms\": " + to_string(waktu_us / 1000.0) + ", \"ram_mb\": " + to_string(diff_ram) + "}";
+            } else {
+                resp = "{\"waktu_ms\": -1, \"ram_mb\": -1, \"error\": \"" + error_msg + "\"}";
+            }
             res.set_content(resp, "application/json");
         });
 
@@ -525,16 +544,25 @@ int main()
             }
             else
             {
-                for (auto it : data_lokasi)
-                {
-                    graf_matrix.masuk_lokasi(it.second);
+                try {
+                    for (auto it : data_lokasi)
+                    {
+                        graf_matrix.masuk_lokasi(it.second);
+                    }
+                    graf_matrix.alokasi_memori_matrix();
+                    for (auto it : data_rute)
+                    {
+                        graf_matrix.masuk_rute(it);
+                    }
+                    data_matrix_masuk = true;
+                } catch (const std::exception& e) {
+                    cout << "\n[!] ERROR: Gagal alokasi matriks (" << e.what() << ")" << endl;
+                    cout << "[!] Adjacency Matrix dibatasi maks 5000 lokasi karena kompleksitas O(V^2)." << endl;
+                    continue;
+                } catch (...) {
+                    cout << "\n[!] ERROR: Gagal alokasi memori (Out Of Memory)" << endl;
+                    continue;
                 }
-                graf_matrix.alokasi_memori_matrix();
-                for (auto it : data_rute)
-                {
-                    graf_matrix.masuk_rute(it);
-                }
-                data_matrix_masuk = true;
             }
 
             double waktu = timer.stop();

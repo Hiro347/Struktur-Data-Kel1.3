@@ -6,7 +6,9 @@
     <meta name="description" content="Visualizer interaktif untuk perbandingan struktur data Adjacency List vs Matrix menggunakan Dataset Road Central USA - Kelompok 1.3">
     <title>Graf Visualizer — Road Central USA | Kelompok 1.3</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Vis.js Standalone -->
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -18,308 +20,437 @@
     </div>
     <div class="grid-pattern"></div>
 
-    <!-- ===== NAVBAR ===== -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-brand">
-            <div class="nav-logo">R</div>
-            <div>
-                <div class="nav-title">Road Central USA — Graph Explorer</div>
-                <div class="nav-subtitle">Perbandingan Adjacency List vs Matrix · DIMACS Dataset</div>
-            </div>
-        </div>
-        <div class="nav-meta">
-            <span class="nav-tag">Struktur Data</span>
-            <span class="nav-tag cyan">Kelompok 1.3</span>
-        </div>
-    </nav>
-
-    <!-- ===== MAIN APP ===== -->
-    <main class="app-layout">
-
-        <!-- Control Bar -->
-        <div class="glass-card control-bar">
-            <div class="control-section">
-                <span class="control-label">Struktur:</span>
-                <div class="struct-toggle">
-                    <button class="struct-btn active" id="toggleListBtn">Adjacency List</button>
-                    <button class="struct-btn" id="toggleMatrixBtn">Adjacency Matrix</button>
+    <div class="dashboard-container">
+        
+        <!-- ============================================
+           ZONE 1: LEFT SIDEBAR NAVIGATION
+           ============================================ -->
+        <aside class="left-sidebar">
+            <div class="nav-brand">
+                <div class="nav-logo">R</div>
+                <div>
+                    <div class="nav-title">Road Explorer</div>
+                    <div class="nav-subtitle">Kelompok 1.3</div>
                 </div>
             </div>
 
-            <div class="control-section">
-                <div class="status-chip">
-                    <span class="status-dot" id="statusDot"></span>
-                    <span id="statusText">Dataset Belum Dimuat</span>
+            <nav class="nav-menu">
+                <button class="nav-link active" id="btn-view-dashboard" title="Dashboard Overview">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-link" id="btn-view-graph" title="Graph Network visualizer">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.178 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 10.1c-.773-.57-.375-1.81.587-1.81h4.907a1 1 0 00.95-.69l1.519-4.674z"/></svg>
+                    <span>Network Graph</span>
+                </button>
+                <button class="nav-link" id="btn-view-benchmark" title="Benchmark Analysis">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    <span>Benchmark</span>
+                </button>
+                <button class="nav-link" id="btn-view-table" title="Dataset Edge Table">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <span>Dataset Table</span>
+                </button>
+                <button class="nav-link" id="btn-view-console" title="C++ Console Log output">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Console Log</span>
+                </button>
+            </nav>
+
+            <div class="nav-footer">
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Beralih Tema">
+                    <!-- Sun Icon -->
+                    <svg class="icon sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <!-- Moon Icon -->
+                    <svg class="icon moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <span>Ubah Tema</span>
+                </button>
+                <div class="nav-tag">Struktur Data</div>
+            </div>
+        </aside>
+
+        <!-- ============================================
+           MAIN DISPLAY WRAPPER
+           ============================================ -->
+        <div class="main-wrapper">
+            
+            <!-- GLOBAL HEADER -->
+            <header class="dashboard-header">
+                <div class="header-info">
+                    <h1 id="page-title">Dashboard Overview</h1>
+                    <p id="page-desc">Ringkasan grafik, metrik kinerja, dan log sistem terpadu</p>
                 </div>
-                <button class="btn btn-primary" id="btnInsertDataset">
+                <div class="header-meta">
+                    <div class="status-chip">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">Dataset Belum Dimuat</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CENTRAL SCROLLABLE CONTENT -->
+            <main class="central-area">
+                
+                <!-- KPI GRID (Always at top of content for quick scanning) -->
+                <section class="kpi-grid">
+                    <div class="kpi-card" style="border-left-color: var(--accent-indigo);">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Node Teraktif (V)</span>
+                            <span class="kpi-trend green">Simpul</span>
+                        </div>
+                        <span class="kpi-value" id="statActiveNodes">0</span>
+                        <span class="kpi-subtext">Total lokasi dalam memori</span>
+                    </div>
+                    <div class="kpi-card" style="border-left-color: var(--accent-cyan);">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Rute Terhubung (E)</span>
+                            <span class="kpi-trend cyan">Sisi</span>
+                        </div>
+                        <span class="kpi-value" id="statActiveEdges">0</span>
+                        <span class="kpi-subtext">Total segmen jalan dimuat</span>
+                    </div>
+                    <div class="kpi-card" style="border-left-color: var(--accent-amber);">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Penggunaan Memori</span>
+                            <span class="kpi-trend amber">RAM</span>
+                        </div>
+                        <span class="kpi-value" id="statMemoryEst">—</span>
+                        <span class="kpi-subtext">Alokasi struktur data</span>
+                    </div>
+                    <div class="kpi-card highlight-kpi" style="border-left-color: var(--accent-emerald);">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Waktu Operasi Terakhir</span>
+                            <span class="kpi-trend emerald" id="lastOpTimeTrend">Latency</span>
+                        </div>
+                        <span class="kpi-value" id="lastOpTimeVal">0 µs</span>
+                        <span class="kpi-subtext">Kecepatan operasi di memori</span>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                   VIEW 1: DASHBOARD OVERVIEW (TAB GABUNGAN)
+                   ============================================ -->
+                <section class="view-section" id="view-dashboard">
+                    <div class="dashboard-layout-grid">
+                        
+                        <!-- Col 1: Overview Chart -->
+                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                Grafik Uji Cepat Kinerja (Latency List vs Matrix)
+                            </div>
+                            <div style="flex:1; min-height: 240px; position: relative;">
+                                <canvas id="overviewChart"></canvas>
+                            </div>
+                            <p class="bench-hint" style="margin-top: 0.75rem;">*Menampilkan perbandingan waktu operasi pada dataset yang sedang aktif saat ini.</p>
+                        </div>
+
+                        <!-- Col 2: Recent Routes Mini Table -->
+                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                Rangkuman Rute Teratas (Edge Preview)
+                            </div>
+                            <div style="flex: 1; overflow-y: auto; max-height: 250px;">
+                                <table class="mini-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Asal</th>
+                                            <th>Tujuan</th>
+                                            <th>Jarak (km)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="miniTableBody">
+                                        <tr>
+                                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Dataset belum dimuat.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Col 3: Network preview details -->
+                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 5.447-2.724A1 1 0 0121 3.182v10.764a1 1 0 01-.553.894L15 18l-6 2zM9 2v18m6-15v13"/></svg>
+                                Pratinjau Jaringan Graf Rute
+                            </div>
+                            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 1rem 0;">
+                                <div class="mini-network-visual-card">
+                                    <div class="pulse-node" id="miniNodePulse" style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent-indigo-dim); border: 2px dashed var(--accent-indigo); display: flex; align-items: center; justify-content: center; color: var(--accent-indigo); font-weight: bold; margin-bottom: 0.85rem;">G</div>
+                                    <h4 id="miniGraphTitle" style="font-weight:600; font-size: 0.9rem; margin-bottom: 0.35rem;">Graf Jaringan Belum Aktif</h4>
+                                    <p id="miniGraphDesc" style="font-size:0.75rem; color: var(--text-tertiary); max-width: 200px; margin-bottom: 1rem;">Silakan muat dataset di panel kanan untuk mengaktifkan visualisasi peta rute.</p>
+                                    <button class="btn btn-ghost" id="btnGoToVisualizer" style="font-size:0.75rem; padding: 0.4rem 0.8rem;">Buka Full Visualizer →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Col 4: Mini Logs View -->
+                        <div class="glass-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                Ringkasan Sistem Log C++
+                            </div>
+                            <div style="flex:1;">
+                                <pre id="miniConsoleLog" class="mini-console-output">Sistem siap... Silakan muat dataset untuk melihat aktivitas log.</pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ============================================
+                   VIEW 2: FULL GRAPH VISUALIZER
+                   ============================================ -->
+                <section class="view-section hidden" id="view-graph">
+                    <div class="glass-card viz-panel" style="height: calc(100vh - 180px); min-height: 450px;">
+                        <div class="viz-canvas">
+                            <div class="sample-badge" id="sampleBadge" style="display: none;">
+                                ⚠️ Sampel Visual: <span id="displayedEdges">0</span> Edge dari <span id="totalEdges">0</span> Total
+                            </div>
+                            <div id="graphCanvas" style="width: 100%; height: 100%;"></div>
+
+                            <!-- Legend -->
+                            <div class="viz-legend">
+                                <div class="legend-row">
+                                    <div class="legend-dot" style="background: var(--node-gudang);"></div>
+                                    <span>Gudang (mod 100)</span>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="legend-dot" style="background: var(--node-tujuan);"></div>
+                                    <span>Tujuan</span>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="legend-dot" style="background: var(--node-road);"></div>
+                                    <span>Road Node</span>
+                                </div>
+                            </div>
+
+                            <!-- Zoom Controls -->
+                            <div class="viz-controls">
+                                <button class="viz-btn" id="btnZoomIn" title="Perbesar">+</button>
+                                <button class="viz-btn" id="btnZoomOut" title="Perkecil">−</button>
+                                <button class="viz-btn" id="btnZoomReset" title="Reset">⟲</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                   VIEW 3: BENCHMARK ANALYSIS
+                   ============================================ -->
+                <section class="view-section hidden" id="view-benchmark">
+                    <div class="glass-card benchmark-section">
+                        <div class="benchmark-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                            <h3>Analisis Performa Lintas Batas Dataset</h3>
+                            <div style="display:flex; gap:0.5rem; align-items:center;">
+                                <span id="benchmarkStatus" class="status-chip" style="font-weight:600; color:var(--text-secondary);">Status: Belum dijalankan</span>
+                                <button class="btn btn-primary" id="btnRunFullBenchmark">
+                                    ⚡ Jalankan Full Benchmark (4 Ukuran)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tab: pilih operasi -->
+                        <div class="tab-group" id="chartTabs" style="display: flex; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 4px; gap: 4px; margin-bottom: 1.25rem;">
+                            <button class="tab-btn active" data-op="insert">Insert</button>
+                            <button class="tab-btn" data-op="search">Search</button>
+                            <button class="tab-btn" data-op="update">Update</button>
+                            <button class="tab-btn" data-op="delete">Delete</button>
+                            <button class="tab-btn" data-op="ram">Memori (MB)</button>
+                        </div>
+
+                        <!-- Chart Canvas -->
+                        <div style="position: relative; width: 100%; height: 350px; background: rgba(0, 0, 0, 0.25); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                            <canvas id="comparisonChart" style="width: 100%; height: 100%;"></canvas>
+                        </div>
+
+                        <!-- Kesimpulan Otomatis -->
+                        <div id="autoAnalysis" class="analysis-box"></div>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                   VIEW 4: DATASET TABLE
+                   ============================================ -->
+                <section class="view-section hidden" id="view-table">
+                    <div class="glass-card table-card">
+                        <div class="table-toolbar">
+                            <h2 class="table-title">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1.1rem;height:1.1rem;color:var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Tabel Segmen Rute
+                            </h2>
+                            <div class="search-wrap">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <input type="text" id="tableSearch" placeholder="Cari rute, node, jarak...">
+                            </div>
+                        </div>
+                        <div class="table-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 12%;">ID Rute</th>
+                                        <th style="width: 33%;">Node Asal</th>
+                                        <th style="width: 33%;">Node Tujuan</th>
+                                        <th style="width: 22%;">Jarak (Jarak)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                            Dataset belum dimuat. Klik "Insert Dataset" untuk memuat data.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-bar">
+                            <span id="pageInfo">Halaman 1 dari 1</span>
+                            <div class="page-btns">
+                                <button class="page-btn" id="pagePrev" disabled>← Sebelumnya</button>
+                                <button class="page-btn" id="pageNext" disabled>Berikutnya →</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                   VIEW 5: CONSOLE LOGS
+                   ============================================ -->
+                <section class="view-section hidden" id="view-console">
+                    <div class="glass-card console-card" style="height: calc(100vh - 180px); min-height: 450px; display:flex; flex-direction:column; padding: 0 !important; overflow:hidden;">
+                        <div class="console-header" style="flex-shrink: 0;">
+                            <span class="console-dot red"></span>
+                            <span class="console-dot yellow"></span>
+                            <span class="console-dot green"></span>
+                            <span class="console-label">Console Output — Replikasi Log C++</span>
+                        </div>
+                        <pre class="console-output" id="consoleLog" style="flex:1; margin: 0; padding: 1.5rem; overflow-y:auto; border-radius: 0;"></pre>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+
+        <!-- ============================================
+           ZONE 4: RIGHT CONTROL SIDEBAR
+           ============================================ -->
+        <aside class="right-sidebar">
+            
+            <!-- Global Config Card -->
+            <div class="glass-card sidebar-card">
+                <h3 class="sidebar-card-title">Pengaturan Graf</h3>
+                <div class="form-group">
+                    <label class="form-label">Struktur Data Utama</label>
+                    <div class="struct-toggle">
+                        <button class="struct-btn active" id="toggleListBtn">Adjacency List</button>
+                        <button class="struct-btn" id="toggleMatrixBtn">Adjacency Matrix</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="btnInsertDataset" style="width: 100%; margin-top: 0.5rem;">
                     <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                    Insert Dataset (Road Central USA)
+                    Insert Dataset
                 </button>
             </div>
-        </div>
 
-        <!-- 3-Column Workspace -->
-        <div class="workspace-grid">
-
-            <!-- Left: Operations -->
-            <div class="ops-col">
-
-                <!-- Search -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Search Rute
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="searchAsal">Lokasi Asal</label>
-                        <select class="form-select" id="searchAsal">
-                            <option value="">— Pilih Asal —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="searchTujuan">Lokasi Tujuan</label>
-                        <select class="form-select" id="searchTujuan">
-                            <option value="">— Pilih Tujuan —</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" id="btnSearch" style="width: 100%;">
-                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Cari Rute Langsung
-                    </button>
-                </div>
-
-                <!-- Update -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent-amber);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        ✏️ Update Dataset
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="updateAsal">Lokasi Asal</label>
-                        <select class="form-select" id="updateAsal">
-                            <option value="">— Pilih Asal —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="updateTujuan">Lokasi Tujuan</label>
-                        <select class="form-select" id="updateTujuan">
-                            <option value="">— Pilih Tujuan —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="updateJarak">Jarak Baru (km)</label>
-                        <input class="form-input" type="number" id="updateJarak" step="any" placeholder="Contoh: 42.5">
-                    </div>
-                    <button class="btn btn-warning" id="btnUpdate" style="width: 100%; background: linear-gradient(135deg, var(--accent-amber), #d97706); box-shadow: 0 4px 16px var(--accent-amber-dim); color: white;">
-                        Update Jarak Rute
-                    </button>
-                </div>
-
-                <!-- Delete -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent-rose);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        Delete Rute
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="deleteAsal">Lokasi Asal</label>
-                        <select class="form-select" id="deleteAsal">
-                            <option value="">— Pilih Asal —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="deleteTujuan">Lokasi Tujuan</label>
-                        <select class="form-select" id="deleteTujuan">
-                            <option value="">— Pilih Tujuan —</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-danger" id="btnDelete" style="width: 100%;">
-                        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        Hapus Rute Terpilih
-                    </button>
-                </div>
-
-                <!-- Benchmark -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent-amber);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Kecepatan Eksekusi
-                    </div>
-                    <div class="bench-group">
-                        <div class="bench-item">
-                            <div class="bench-meta">
-                                <span class="bench-label">Adjacency List</span>
-                                <span class="bench-value indigo" id="timeListVal">0 µs</span>
+            <!-- Operations Card (CRUD - Collapsible Accordion Style) -->
+            <div class="glass-card sidebar-card" style="flex: 1; display:flex; flex-direction:column; min-height: 320px; overflow:hidden; padding: 1.25rem 0.5rem 1.25rem 1.25rem !important;">
+                <h3 class="sidebar-card-title" style="padding-right: 0.75rem;">Operasi Rute</h3>
+                
+                <div class="ops-accordion-container" style="flex:1; overflow-y:auto; padding-right: 0.75rem;">
+                    <!-- Accordion Section 1: Search -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderSearch">
+                            <span class="acc-title-text">🔍 Cari Rute</span>
+                            <span class="acc-arrow">▼</span>
+                        </button>
+                        <div class="acc-content" id="accContentSearch">
+                            <div class="form-group">
+                                <label class="form-label" for="searchAsal">Lokasi Asal</label>
+                                <select class="form-select" id="searchAsal">
+                                    <option value="">— Pilih Asal —</option>
+                                </select>
                             </div>
-                            <div class="bench-track">
-                                <div class="bench-fill indigo" id="barListFill"></div>
+                            <div class="form-group">
+                                <label class="form-label" for="searchTujuan">Lokasi Tujuan</label>
+                                <select class="form-select" id="searchTujuan">
+                                    <option value="">— Pilih Tujuan —</option>
+                                </select>
                             </div>
-                        </div>
-                        <div class="bench-item">
-                            <div class="bench-meta">
-                                <span class="bench-label">Adjacency Matrix</span>
-                                <span class="bench-value cyan" id="timeMatrixVal">0 µs</span>
-                            </div>
-                            <div class="bench-track">
-                                <div class="bench-fill cyan" id="barMatrixFill"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="bench-hint">*µs = mikrodetik. Menunjukkan kecepatan insert ke struktur data yang dipilih.</p>
-                </div>
-            </div>
-
-            <!-- Center: Graph Visualizer -->
-            <div class="glass-card viz-panel">
-                <div class="viz-canvas">
-                    <div class="sample-badge" id="sampleBadge" style="display: none;">
-                        ⚠️ Sampel Visual: <span id="displayedEdges">0</span> Edge dari <span id="totalEdges">0</span> Total
-                    </div>
-                    <div id="graphCanvas" style="width: 100%; height: 100%;"></div>
-
-                    <!-- Legend -->
-                    <div class="viz-legend">
-                        <div class="legend-row">
-                            <div class="legend-dot" style="background: var(--node-gudang);"></div>
-                            <span>Gudang (mod 100)</span>
-                        </div>
-                        <div class="legend-row">
-                            <div class="legend-dot" style="background: var(--node-tujuan);"></div>
-                            <span>Tujuan</span>
-                        </div>
-                        <div class="legend-row">
-                            <div class="legend-dot" style="background: var(--node-road);"></div>
-                            <span>Road Node</span>
+                            <button class="btn btn-primary" id="btnSearch" style="width: 100%;">Cari Rute</button>
                         </div>
                     </div>
 
-                    <!-- Zoom Controls -->
-                    <div class="viz-controls">
-                        <button class="viz-btn" onclick="zoomIn()" title="Perbesar">+</button>
-                        <button class="viz-btn" onclick="zoomOut()" title="Perkecil">−</button>
-                        <button class="viz-btn" onclick="resetZoom()" title="Reset">⟲</button>
+                    <!-- Accordion Section 2: Update -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderUpdate">
+                            <span class="acc-title-text">✏️ Update Rute</span>
+                            <span class="acc-arrow">▶</span>
+                        </button>
+                        <div class="acc-content collapsed" id="accContentUpdate">
+                            <div class="form-group">
+                                <label class="form-label" for="updateAsal">Lokasi Asal</label>
+                                <select class="form-select" id="updateAsal">
+                                    <option value="">— Pilih Asal —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="updateTujuan">Lokasi Tujuan</label>
+                                <select class="form-select" id="updateTujuan">
+                                    <option value="">— Pilih Tujuan —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="updateJarak">Jarak Baru (km)</label>
+                                <input class="form-input" type="number" id="updateJarak" step="any" placeholder="Contoh: 42.5">
+                            </div>
+                            <button class="btn btn-warning" id="btnUpdate" style="width: 100%;">Update Jarak</button>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Section 3: Delete -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderDelete">
+                            <span class="acc-title-text">🗑️ Hapus Rute</span>
+                            <span class="acc-arrow">▶</span>
+                        </button>
+                        <div class="acc-content collapsed" id="accContentDelete">
+                            <div class="form-group">
+                                <label class="form-label" for="deleteAsal">Lokasi Asal</label>
+                                <select class="form-select" id="deleteAsal">
+                                    <option value="">— Pilih Asal —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="deleteTujuan">Lokasi Tujuan</label>
+                                <select class="form-select" id="deleteTujuan">
+                                    <option value="">— Pilih Tujuan —</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-danger" id="btnDelete" style="width: 100%;">Hapus Rute</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Inspector -->
-            <div class="glass-card inspector-col">
-                <div class="card-header" id="inspectTitle">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    Live Data Inspector
-                </div>
-
-                <div class="inspect-content" id="inspectBody">
+            <!-- Inspector Card -->
+            <div class="glass-card sidebar-card" style="height: 220px; display:flex; flex-direction:column; overflow:hidden;">
+                <h3 class="sidebar-card-title">Live Data Inspector</h3>
+                <div class="inspect-content" id="inspectBody" style="flex:1;">
                     <div class="inspect-empty">
                         Dataset belum dimuat.<br>Klik <strong>"Insert Dataset"</strong> untuk memulai.
                     </div>
                 </div>
-
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">Node (V)</span>
-                        <span class="stat-value" id="statActiveNodes">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Rute (E)</span>
-                        <span class="stat-value" id="statActiveEdges">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Memori</span>
-                        <span class="stat-value" id="statMemoryEst" style="font-size: 0.75rem; color: var(--text-secondary);">—</span>
-                    </div>
-                </div>
             </div>
 
-        </div><!-- end workspace-grid -->
+        </aside>
 
-        <!-- Benchmark Comparison Section -->
-        <div class="glass-card benchmark-section" style="margin-top: 0.75rem;">
-            <div class="card-header">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-                📊 Grafik Perbandingan Performa Lintas Dataset
-            </div>
-            
-            <div class="benchmark-controls" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
-                <button class="btn btn-primary" id="btnRunFullBenchmark">
-                    ⚡ Jalankan Full Benchmark (4 Ukuran Dataset)
-                </button>
-                <span id="benchmarkStatus" class="status-chip" style="font-weight: 600; color: var(--text-secondary);">
-                    Status: Belum dijalankan
-                </span>
-            </div>
-            
-            <!-- Tab: pilih operasi yang ingin dilihat grafiknya -->
-            <div class="tab-group" id="chartTabs" style="display: flex; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 4px; gap: 4px; margin-bottom: 1.25rem;">
-                <button class="tab-btn active" data-op="insert">Insert</button>
-                <button class="tab-btn" data-op="search">Search</button>
-                <button class="tab-btn" data-op="update">Update</button>
-                <button class="tab-btn" data-op="delete">Delete</button>
-                <button class="tab-btn" data-op="ram">Memori (MB)</button>
-            </div>
-            
-            <!-- Chart Canvas (Chart.js) -->
-            <div style="position: relative; width: 100%; height: 350px; background: rgba(0, 0, 0, 0.25); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid rgba(255,255,255,0.04);">
-                <canvas id="comparisonChart" style="width: 100%; height: 100%;"></canvas>
-            </div>
-            
-            <!-- Kesimpulan Otomatis -->
-            <div id="autoAnalysis" class="analysis-box" style="margin-top: 1.25rem; padding: 1rem; background: var(--accent-indigo-dim); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-primary); line-height: 1.6; display: none;"></div>
-        </div>
+    </div>
 
-        <!-- Table Panel -->
-        <div class="glass-card table-card">
-            <div class="table-toolbar">
-                <h2 class="table-title">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1.1rem;height:1.1rem;color:var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Tabel Rute (Edge Dataset)
-                </h2>
-                <div class="search-wrap">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="tableSearch" placeholder="Cari rute, node, jarak...">
-                </div>
-            </div>
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 12%;">ID Rute</th>
-                            <th style="width: 33%;">Node Asal</th>
-                            <th style="width: 33%;">Node Tujuan</th>
-                            <th style="width: 22%;">Bobot (Jarak)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                                Dataset belum dimuat. Klik "Insert Dataset" untuk memuat data.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination-bar">
-                <span id="pageInfo">Halaman 1 dari 1</span>
-                <div class="page-btns">
-                    <button class="page-btn" id="pagePrev" disabled>← Sebelumnya</button>
-                    <button class="page-btn" id="pageNext" disabled>Berikutnya →</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Console -->
-        <div class="glass-card console-card">
-            <div class="console-header">
-                <span class="console-dot red"></span>
-                <span class="console-dot yellow"></span>
-                <span class="console-dot green"></span>
-                <span class="console-label">Console Output — Replikasi Log C++</span>
-            </div>
-            <pre class="console-output" id="consoleLog"></pre>
-        </div>
-    </main>
-
-    <!-- Dataset Selector Modal -->
+    <!-- ============================================
+       DATASET SELECTOR MODAL
+       ============================================ -->
     <div class="modal-overlay" id="datasetModal">
         <div class="modal-content">
             <div class="modal-title">
