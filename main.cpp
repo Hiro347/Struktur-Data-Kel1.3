@@ -357,6 +357,56 @@ int main()
             res.set_content(resp, "application/json");
         });
 
+        svr.Post("/api/insert_rute", [&](const httplib::Request& req, httplib::Response& res) {
+            string body = req.body;
+            string asal = getJsonStringValue(body, "asal");
+            string tujuan = getJsonStringValue(body, "tujuan");
+            double jarak = getJsonDoubleValue(body, "jarak");
+            string struktur = getJsonStringValue(body, "struktur");
+
+            PerformanceTimer p_timer;
+            p_timer.start();
+
+            Rute r;
+            r.id_rute = "Rute_Baru_" + asal + "_" + tujuan;
+            r.lokasi_asal = asal;
+            r.lokasi_tujuan = tujuan;
+            r.jarak_km = jarak;
+
+            if (struktur == "matrix") {
+                graf_matrix.masuk_rute(r);
+            } else {
+                graf_list.masuk_rute(r);
+            }
+
+            double waktu_us = p_timer.stop();
+            string resp = "{\"waktu_us\": " + to_string(waktu_us) + "}";
+            res.set_content(resp, "application/json");
+        });
+
+        svr.Post("/api/insert_lokasi", [&](const httplib::Request& req, httplib::Response& res) {
+            string body = req.body;
+            string id_lok = getJsonStringValue(body, "id");
+            string nama = getJsonStringValue(body, "nama");
+            string tipe = getJsonStringValue(body, "tipe");
+            string struktur = getJsonStringValue(body, "struktur");
+
+            PerformanceTimer p_timer;
+            p_timer.start();
+
+            Lokasi loc = {id_lok, nama, tipe};
+
+            if (struktur == "matrix") {
+                graf_matrix.tambah_lokasi_dinamis(loc);
+            } else {
+                graf_list.masuk_lokasi(loc);
+            }
+
+            double waktu_us = p_timer.stop();
+            string resp = "{\"waktu_us\": " + to_string(waktu_us) + ", \"id\": \"" + id_lok + "\"}";
+            res.set_content(resp, "application/json");
+        });
+
         svr.Post("/api/benchmark-compare", [&](const httplib::Request& req, httplib::Response& res) {
             int limit = 100000;
             string body = req.body;

@@ -360,6 +360,57 @@
                 <h3 class="sidebar-card-title" style="padding-right: 0.75rem;">Operasi Rute</h3>
                 
                 <div class="ops-accordion-container" style="flex:1; overflow-y:auto; padding-right: 0.75rem;">
+                    <!-- Accordion Section 0a: Insert Lokasi -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderInsertLokasi">
+                            <span class="acc-title-text">📍 Tambah Lokasi</span>
+                            <span class="acc-arrow">▶</span>
+                        </button>
+                        <div class="acc-content collapsed" id="accContentInsertLokasi">
+                            <div class="form-group">
+                                <label class="form-label" for="insertLokasiNama">Nama Lokasi</label>
+                                <input class="form-input" type="text" id="insertLokasiNama" placeholder="Contoh: Gudang Cabang A">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="insertLokasiTipe">Tipe Lokasi</label>
+                                <select class="form-select" id="insertLokasiTipe">
+                                    <option value="Tujuan">Tujuan</option>
+                                    <option value="Gudang">Gudang</option>
+                                    <option value="Kantor">Kantor</option>
+                                    <option value="Rumah">Rumah</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="btnInsertLokasi" style="width: 100%;">Tambah Lokasi</button>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Section 0b: Insert Baru -->
+                    <div class="acc-section">
+                        <button class="acc-header" id="accHeaderInsertBaru">
+                            <span class="acc-title-text">➕ Tambah Rute</span>
+                            <span class="acc-arrow">▶</span>
+                        </button>
+                        <div class="acc-content collapsed" id="accContentInsertBaru">
+                            <div class="form-group">
+                                <label class="form-label" for="insertBaruAsal">Lokasi Asal</label>
+                                <select class="form-select" id="insertBaruAsal">
+                                    <option value="">— Pilih Asal —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="insertBaruTujuan">Lokasi Tujuan</label>
+                                <select class="form-select" id="insertBaruTujuan">
+                                    <option value="">— Pilih Tujuan —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="insertBaruJarak">Jarak (km)</label>
+                                <input class="form-input" type="number" id="insertBaruJarak" step="any" placeholder="Contoh: 15.5">
+                            </div>
+                            <button class="btn btn-primary" id="btnInsertBaru" style="width: 100%;">Tambah Rute</button>
+                        </div>
+                    </div>
+
                     <!-- Accordion Section 1: Search -->
                     <div class="acc-section">
                         <button class="acc-header" id="accHeaderSearch">

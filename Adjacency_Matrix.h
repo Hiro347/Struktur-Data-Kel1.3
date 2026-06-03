@@ -30,6 +30,27 @@ public:
         }
     }
 
+    // Menambahkan lokasi ke matriks yang sudah dialokasikan (membutuhkan realokasi)
+    void tambah_lokasi_dinamis(const Lokasi& loc)
+    {
+        if (lokasi_ke_index.find(loc.id_lokasi) != lokasi_ke_index.end()) return;
+        
+        masuk_lokasi(loc);
+        
+        // O(V) resize operasi
+        matrix_rute.resize(jumlah_lokasi);
+        for (int i = 0; i < jumlah_lokasi; i++) {
+            matrix_rute[i].resize(jumlah_lokasi);
+            if (i < jumlah_lokasi - 1) {
+                matrix_rute[i][jumlah_lokasi - 1].jarak_km = -1.0;
+            } else {
+                for (int j = 0; j < jumlah_lokasi; j++) {
+                    matrix_rute[jumlah_lokasi - 1][j].jarak_km = -1.0;
+                }
+            }
+        }
+    }
+
     // Mengalokasikan matriks 2D sekaligus (Batch Allocation)
     void alokasi_memori_matrix()
     {

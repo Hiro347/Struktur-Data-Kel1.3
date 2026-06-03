@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSearch = document.getElementById('btnSearch');
     const btnDelete = document.getElementById('btnDelete');
     const btnUpdate = document.getElementById('btnUpdate');
+    const btnInsertBaru = document.getElementById('btnInsertBaru');
+    const btnInsertLokasi = document.getElementById('btnInsertLokasi');
 
     const searchAsal = document.getElementById('searchAsal');
     const searchTujuan = document.getElementById('searchTujuan');
@@ -73,6 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateAsal = document.getElementById('updateAsal');
     const updateTujuan = document.getElementById('updateTujuan');
     const updateJarak = document.getElementById('updateJarak');
+    const insertBaruAsal = document.getElementById('insertBaruAsal');
+    const insertBaruTujuan = document.getElementById('insertBaruTujuan');
+    const insertBaruJarak = document.getElementById('insertBaruJarak');
+    const insertLokasiNama = document.getElementById('insertLokasiNama');
+    const insertLokasiTipe = document.getElementById('insertLokasiTipe');
 
     // Full benchmarks
     const btnRunFullBenchmark = document.getElementById('btnRunFullBenchmark');
@@ -192,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Accordion Control (Right Sidebar)
     // ===================================
     const accs = [
+        { header: document.getElementById('accHeaderInsertLokasi'), content: document.getElementById('accContentInsertLokasi') },
+        { header: document.getElementById('accHeaderInsertBaru'), content: document.getElementById('accContentInsertBaru') },
         { header: document.getElementById('accHeaderSearch'), content: document.getElementById('accContentSearch') },
         { header: document.getElementById('accHeaderUpdate'), content: document.getElementById('accContentUpdate') },
         { header: document.getElementById('accHeaderDelete'), content: document.getElementById('accContentDelete') }
@@ -535,7 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Populating Dropdowns
     // ===================================
     function populateSelectors() {
-        const uniqueSources = [...new Set(allEdges.map(e => e.from))].sort();
+        // Use allNodes so new floating nodes can be selected
+        const uniqueSources = [...new Set(allNodes.map(n => n.id))].sort();
 
         const populateAsal = (asalSelect) => {
             asalSelect.innerHTML = '<option value="">— Pilih Asal —</option>';
@@ -550,10 +560,12 @@ document.addEventListener('DOMContentLoaded', () => {
         populateAsal(searchAsal);
         populateAsal(updateAsal);
         populateAsal(deleteAsal);
+        populateAsal(insertBaruAsal);
 
         searchTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
         updateTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
         deleteTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
+        insertBaruTujuan.innerHTML = '<option value="">— Pilih Asal Dulu —</option>';
     }
 
     // ===================================
@@ -575,6 +587,109 @@ document.addEventListener('DOMContentLoaded', () => {
         html += '</div></div>';
         inspectBody.innerHTML = html;
     }
+
+    // ===================================
+    // Operations: INSERT LOKASI (NODE)
+    // ===================================
+    btnInsertLokasi.addEventListener('click', async () => {
+        const nama = insertLokasiNama.value;
+        const tipe = insertLokasiTipe.value;
+        if (!nama || !tipe) {
+            showToast('Isi nama lokasi dan tipe!', 'error');
+            return;
+        }
+        if (!window.GraphData || !window.GraphData.isLoaded) {
+            showToast('Muat dataset terlebih dahulu!', 'error');
+            return;
+        }
+
+        const nodeId = "N-" + (allNodes.length + 1000000); // Generate Unique ID
+
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Menambahkan node lokasi baru: ${nama} (${tipe}) via ${structName}...`);
+
+        const res = await safeFetch('/api/insert_lokasi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: nodeId, nama, tipe, struktur: currentStruktur })
+        });
+        if (!res) return;
+        const data = await res.json();
+
+        // Update local graph data cache
+        let nodeColor = '#34d399';
+        if (tipe === 'Gudang') nodeColor = '#fbbf24';
+        else if (tipe === 'Rumah') nodeColor = '#3b82f6';
+        else if (tipe === 'Kantor') nodeColor = '#a78bfa';
+
+        allNodes.push({
+            id: nodeId,
+            label: tipe,
+            group: tipe,
+            color: nodeColor,
+            font: { color: document.body.classList.contains('light-theme') ? '#0f172a' : '#f1f5f9' },
+            size: tipe === 'Gudang' ? 30 : 20,
+            shape: tipe === 'Gudang' ? 'star' : 'dot'
+        });
+
+        populateSelectors(); // Refresh dropdowns
+        drawGraphVis({ nodes: allNodes, edges: allEdges });
+        
+        statNodes.textContent = formatNumber(allNodes.length);
+        const timeUs = data.waktu_us;
+        lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+
+        addLog(`[+] Lokasi ${nama} (${nodeId}) BERHASIL DITAMBAHKAN! | Waktu: ${formatTimeHelper(timeUs)}`);
+        showToast(`Lokasi berhasil ditambahkan (${structName})`, "success");
+        
+        insertLokasiNama.value = ''; // clear form
+    });
+
+    // ===================================
+    // Operations: INSERT RUTE BARU
+    // ===================================
+    btnInsertBaru.addEventListener('click', async () => {
+        const asal = insertBaruAsal.value;
+        const tujuan = insertBaruTujuan.value;
+        const jarak = insertBaruJarak.value;
+        if (!asal || !tujuan || !jarak) {
+            showToast('Pilih lokasi asal, tujuan, dan jarak!', 'error');
+            return;
+        }
+        if (!window.GraphData || !window.GraphData.isLoaded) {
+            showToast('Muat dataset terlebih dahulu!', 'error');
+            return;
+        }
+
+        const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
+        addLog(`Menambahkan rute baru: ${asal} → ${tujuan} sejauh ${jarak} km (via ${structName})...`);
+
+        const res = await safeFetch('/api/insert_rute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ asal, tujuan, jarak: parseFloat(jarak), struktur: currentStruktur })
+        });
+        if (!res) return;
+        const data = await res.json();
+
+        // Update local cache
+        const edgeId = "Rute_Baru_" + asal + "_" + tujuan;
+        allEdges.push({ from: asal, to: tujuan, label: parseFloat(jarak).toString(), id_rute: edgeId });
+        
+        filteredEdges = [...allEdges];
+        renderTable();
+        drawGraphVis({ nodes: allNodes, edges: allEdges });
+        
+        statEdges.textContent = formatNumber(allEdges.length);
+
+        const timeUs = data.waktu_us;
+        lastOpTimeVal.textContent = formatTimeHelper(timeUs);
+
+        addLog(`[+] Rute ${asal} → ${tujuan} BERHASIL DITAMBAHKAN! | Waktu: ${formatTimeHelper(timeUs)}`);
+        showToast(`Rute berhasil ditambahkan (${structName})`, "success");
+        
+        insertBaruJarak.value = ''; // clear form
+    });
 
     // ===================================
     // Operations: SEARCH RUTE
@@ -1117,10 +1232,15 @@ document.addEventListener('DOMContentLoaded', () => {
             tujuanSelect.innerHTML = '<option value="">— Pilih Tujuan —</option>';
             if (!selectedAsal) return;
 
-            const dests = allEdges
-                .filter(e => e.from === selectedAsal)
-                .map(e => e.to);
-            const uniqueDests = [...new Set(dests)].sort();
+            // Untuk pencarian/update/hapus, kita batasi ke edges yang ada
+            // Tapi untuk Tambah Rute, kita izinkan menargetkan ANY node!
+            let uniqueDests = [];
+            if (tujuanSelect === insertBaruTujuan) {
+                uniqueDests = [...new Set(allNodes.map(n => n.id))].filter(id => id !== selectedAsal).sort();
+            } else {
+                const dests = allEdges.filter(e => e.from === selectedAsal).map(e => e.to);
+                uniqueDests = [...new Set(dests)].sort();
+            }
 
             uniqueDests.forEach(dest => {
                 const opt = document.createElement('option');
@@ -1133,6 +1253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchAsal.addEventListener('change', () => populateTujuan(searchAsal, searchTujuan));
         updateAsal.addEventListener('change', () => populateTujuan(updateAsal, updateTujuan));
         deleteAsal.addEventListener('change', () => populateTujuan(deleteAsal, deleteTujuan));
+        insertBaruAsal.addEventListener('change', () => populateTujuan(insertBaruAsal, insertBaruTujuan));
     }
 
     // ===================================
