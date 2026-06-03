@@ -3,7 +3,74 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // Register global ChartJS plugins
-    Chart.register(ChartDataLabels);
+    const brutalistTrackPlugin = {
+        id: 'brutalistTrack',
+        beforeDatasetsDraw(chart) {
+            const { ctx, chartArea: { top, bottom } } = chart;
+            ctx.save();
+
+            const isLight = document.body.classList.contains('light-theme');
+            
+            // Find track color based on the parent card class
+            const card = chart.canvas.closest('.ui-card');
+            let trackColor = isLight ? '#FAF5DB' : '#000000'; // default fallback
+            
+            if (card) {
+                if (card.classList.contains('card-cream')) {
+                    trackColor = isLight ? '#E3DECD' : '#E0DBCC';
+                } else if (card.classList.contains('card-grey')) {
+                    trackColor = isLight ? '#D5CEBE' : '#CCC5B6';
+                } else if (card.classList.contains('card-pink')) {
+                    trackColor = '#E359C1';
+                } else if (card.classList.contains('card-dark')) {
+                    trackColor = '#252528';
+                }
+            }
+
+            const activeDatasets = chart.data.datasets;
+            activeDatasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                // Skip hidden datasets or non-bar type datasets
+                if (meta.hidden || meta.type !== 'bar') return;
+
+                meta.data.forEach((bar) => {
+                    ctx.fillStyle = trackColor;
+
+                    const xPos = bar.x;
+                    const width = bar.width || 35;
+                    const trackWidth = width;
+                    const trackTop = top;
+                    const trackBottom = bottom;
+                    const radius = trackWidth / 2;
+
+                    // Draw capsule track
+                    ctx.beginPath();
+                    if (typeof ctx.roundRect === 'function') {
+                        ctx.roundRect(xPos - trackWidth / 2, trackTop, trackWidth, trackBottom - trackTop, radius);
+                    } else {
+                        // Fallback round rect for older environments
+                        const x = xPos - trackWidth / 2;
+                        const y = trackTop;
+                        const w = trackWidth;
+                        const h = trackBottom - trackTop;
+                        const r = radius;
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + w - r, y);
+                        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                        ctx.lineTo(x + w, y + h - r);
+                        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                        ctx.lineTo(x + r, y + h);
+                        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                    }
+                    ctx.fill();
+                });
+            });
+            ctx.restore();
+        }
+    };
+    Chart.register(ChartDataLabels, brutalistTrackPlugin);
 
     // ===================================
     // DOM Navigation References (Zone 1)
@@ -25,6 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const sunIcon = themeToggleBtn.querySelector('.sun-icon');
     const moonIcon = themeToggleBtn.querySelector('.moon-icon');
+
+    // Sidebar collapse controls
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+    const dashboardContainer = document.querySelector('.dashboard-container');
 
     // ===================================
     // DOM Controls & UI Elements
@@ -256,7 +328,25 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Beralih ke Tema Terang", "success");
         }
         updateChartThemeColors();
+        if (network) {
+            drawGraphVis({ nodes: allNodes, edges: allEdges });
+        }
     });
+
+    // Sidebar collapse event listeners
+    if (btnToggleSidebar) {
+        btnToggleSidebar.addEventListener('click', () => {
+            dashboardContainer.classList.toggle('sidebar-collapsed');
+            const isCollapsed = dashboardContainer.classList.contains('sidebar-collapsed');
+            showToast(isCollapsed ? "Panel Operasi disembunyikan" : "Panel Operasi ditampilkan", "info");
+        });
+    }
+    if (btnCloseSidebar) {
+        btnCloseSidebar.addEventListener('click', () => {
+            dashboardContainer.classList.add('sidebar-collapsed');
+            showToast("Panel Operasi disembunyikan", "info");
+        });
+    }
 
     function updateChartThemeColors() {
         const isLight = document.body.classList.contains('light-theme');
@@ -272,11 +362,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 chart.options.scales.y.ticks.color = tickColor;
                 if (chart.options.scales.y.title) chart.options.scales.y.title.color = tickColor;
                 chart.options.plugins.legend.labels.color = labelColor;
+                
+                if (chart.options.plugins.datalabels) {
+                    chart.options.plugins.datalabels.color = labelColor;
+                }
+
+                // Align dataset colors and rounded borders on theme update
+                const mathicalColors = ['#FF66D8', '#5856D6', '#D8F34C', '#FFAD33'];
+                if (chart.data && chart.data.datasets) {
+                    chart.data.datasets.forEach((dataset, idx) => {
+                        if (chart === myChart) {
+                            dataset.backgroundColor = idx === 0 ? '#5856D6' : '#FF66D8';
+                        } else {
+                            dataset.backgroundColor = mathicalColors[idx % mathicalColors.length];
+                        }
+                        dataset.borderColor = '#000000';
+                        dataset.borderWidth = 3;
+                        dataset.borderRadius = 9999;
+                        dataset.borderSkipped = false;
+                        dataset.barPercentage = 0.7;
+                        dataset.categoryPercentage = 0.7;
+                    });
+                }
+                
                 chart.update('none');
             }
         };
         updateConfig(myChart);
         updateConfig(overviewChartInstance);
+        updateConfig(crudChartInstance);
     }
 
     // ===================================
@@ -416,7 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDot.classList.add('active');
             const structName = currentStruktur === 'list' ? 'Adjacency List' : 'Adjacency Matrix';
             statusText.textContent = `Dataset Aktif — ${limitLabel} (${structName})`;
-            statusText.style.color = 'var(--accent-emerald)';
 
             btnInsertDataset.innerHTML = `
                 <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -632,17 +745,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
 
         // Update local graph data cache
-        let nodeColor = '#34d399';
-        if (tipe === 'Gudang') nodeColor = '#fbbf24';
-        else if (tipe === 'Rumah') nodeColor = '#3b82f6';
-        else if (tipe === 'Kantor') nodeColor = '#a78bfa';
+        // Update local graph data cache
+        let nodeColor = '#D8F34C'; // default / Tujuan
+        if (tipe === 'Gudang') nodeColor = '#FF66D8';
+        else if (tipe === 'Rumah') nodeColor = '#5856D6';
+        else if (tipe === 'Kantor') nodeColor = '#8B5CF6';
 
         allNodes.push({
             id: nodeId,
             label: tipe,
             group: tipe,
-            color: nodeColor,
-            font: { color: document.body.classList.contains('light-theme') ? '#0f172a' : '#f1f5f9' },
+            color: {
+                background: nodeColor,
+                border: '#000000',
+                highlight: { background: '#ffffff', border: '#000000' },
+                hover: { background: nodeColor, border: '#000000' }
+            },
+            font: { 
+                color: document.body.classList.contains('light-theme') ? '#000000' : '#ffffff',
+                face: 'Plus Jakarta Sans',
+                size: 11,
+                bold: true
+            },
             size: tipe === 'Gudang' ? 30 : 20,
             shape: tipe === 'Gudang' ? 'star' : 'dot'
         });
@@ -967,23 +1091,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Adjacency List',
                         data: listData,
-                        backgroundColor: 'rgba(129, 140, 248, 0.65)',
-                        borderColor: '#818cf8',
-                        borderWidth: 1.5,
-                        borderRadius: 5
+                        backgroundColor: '#5856D6',
+                        borderColor: '#000000',
+                        borderWidth: 3,
+                        borderRadius: 9999,
+                        borderSkipped: false,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.7
                     },
                     {
                         label: 'Adjacency Matrix',
                         data: matrixData,
-                        backgroundColor: 'rgba(34, 211, 238, 0.65)',
-                        borderColor: '#22d3ee',
-                        borderWidth: 1.5,
-                        borderRadius: 5
+                        backgroundColor: '#FF66D8',
+                        borderColor: '#000000',
+                        borderWidth: 3,
+                        borderRadius: 9999,
+                        borderSkipped: false,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.7
                     }
                 ]
             },
             options: {
-                indexAxis: 'y',
+                indexAxis: 'x', // Vertical bar chart
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: false,
@@ -994,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: labelColor,
                         font: { family: 'JetBrains Mono', size: 10, weight: '600' },
                         anchor: 'end',
-                        align: 'end',
+                        align: 'top',
                         formatter: function(value, context) {
                             const datasetLabel = context.dataset.label;
                             const sizeLabel = context.chart.data.labels[context.dataIndex];
@@ -1030,7 +1160,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 scales: {
                     x: {
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor }
+                    },
+                    y: {
                         type: 'logarithmic',
+                        min: 0.01,
                         grid: { color: gridColor },
                         ticks: { color: tickColor },
                         title: {
@@ -1039,10 +1174,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             color: tickColor,
                             font: { family: 'Inter', size: 10, weight: '700' }
                         }
-                    },
-                    y: {
-                        grid: { color: gridColor },
-                        ticks: { color: tickColor }
                     }
                 }
             }
@@ -1090,12 +1221,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vis.js Graph Drawing
     // ===================================
     function drawGraphVis(data) {
+        const isLight = document.body.classList.contains('light-theme');
         const nodes = new vis.DataSet(data.nodes.map(n => {
-            let color = '#818cf8';
-            if (n.group === 'Gudang') color = '#fbbf24';
-            else if (n.group === 'Tujuan') color = '#34d399';
-            else if (n.group === 'Rumah') color = '#3b82f6';
-            else if (n.group === 'Kantor') color = '#a78bfa';
+            let color = '#D8F34C'; // Yellow/Lime default
+            if (n.group === 'Gudang') color = '#FF66D8';
+            else if (n.group === 'Rumah') color = '#5856D6';
+            else if (n.group === 'Kantor') color = '#8B5CF6';
+            else if (n.group === 'Tujuan') color = '#D8F34C';
 
             return {
                 id: n.id,
@@ -1103,33 +1235,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 group: n.group,
                 color: {
                     background: color,
-                    border: 'rgba(255,255,255,0.3)',
-                    highlight: { background: '#fff', border: color },
-                    hover: { background: color, border: '#fff' }
+                    border: '#000000',
+                    highlight: { background: '#ffffff', border: '#000000' },
+                    hover: { background: color, border: '#000000' }
+                },
+                font: {
+                    color: isLight ? '#000000' : '#ffffff',
+                    size: 11,
+                    face: 'Plus Jakarta Sans',
+                    bold: true
                 }
             };
         }));
 
-        const edges = new vis.DataSet(data.edges.map((e, i) => ({
-            id: 'e' + i,
-            from: e.from,
-            to: e.to,
-            label: e.label + ' km',
-            font: { align: 'middle', color: 'rgba(148, 163, 184, 0.65)', size: 9, face: 'Inter' },
-            color: { color: 'rgba(129, 140, 248, 0.15)', highlight: '#818cf8', hover: 'rgba(129, 140, 248, 0.4)' }
-        })));
+        const edges = new vis.DataSet(data.edges.map((e, i) => {
+            const lineColor = isLight ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.25)';
+            const highlightColor = isLight ? '#000000' : '#ffffff';
+            const hoverColor = isLight ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
+            
+            return {
+                id: 'e' + i,
+                from: e.from,
+                to: e.to,
+                label: e.label + ' km',
+                font: { 
+                    align: 'middle', 
+                    color: isLight ? '#475569' : '#94a3b8', 
+                    size: 10, 
+                    face: 'Plus Jakarta Sans',
+                    bold: true
+                },
+                color: { color: lineColor, highlight: highlightColor, hover: hoverColor }
+            };
+        }));
 
         const graphData = { nodes, edges };
         const options = {
             nodes: {
                 shape: 'dot',
-                size: 11,
-                font: { color: 'rgba(255,255,255,0.85)', size: 9, face: 'Inter' },
-                borderWidth: 1.5,
-                shadow: { enabled: true, color: 'rgba(0,0,0,0.3)', size: 6, x: 0, y: 2 }
+                size: 14,
+                font: { 
+                    color: isLight ? '#000000' : '#ffffff', 
+                    size: 11, 
+                    face: 'Plus Jakarta Sans',
+                    bold: true
+                },
+                borderWidth: 3,
+                shadow: { enabled: true, color: 'rgba(0,0,0,0.2)', size: 6, x: 0, y: 2 }
             },
             edges: {
-                width: 1.5,
+                width: 3.5,
                 smooth: { type: 'continuous', roundness: 0.2 },
                 arrows: { to: { enabled: false } }
             },
@@ -1207,19 +1362,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelColor = isLight ? '#0f172a' : '#f1f5f9';
 
         const commonOptions = {
-            indexAxis: 'y',
+            indexAxis: 'x', // Vertical bar chart
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 datalabels: {
                     color: labelColor,
-                    font: { family: 'JetBrains Mono', size: 10, weight: '600' },
+                    font: { family: 'Plus Jakarta Sans', size: 9, weight: '600' },
                     anchor: 'end',
-                    align: 'start',
+                    align: 'top',
                     formatter: function(value, context) {
-                        if (value <= 0) return '';
+                        if (value === null || value <= 0) return '';
                         const formatted = value < 1 ? value.toFixed(3) : value.toFixed(1);
-                        return `${context.dataset.label}: ${formatted}`;
+                        return formatted; // Return only the value since tracks/legends label the bars
                     }
                 },
                 legend: {
@@ -1228,13 +1383,19 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             scales: {
                 x: {
-                    type: 'logarithmic',
                     grid: { color: gridColor },
                     ticks: { color: tickColor }
                 },
                 y: {
+                    type: 'logarithmic',
+                    min: 0.01,
                     grid: { color: gridColor },
-                    ticks: { color: tickColor }
+                    ticks: { color: tickColor },
+                    title: {
+                        display: true,
+                        text: 'Waktu (ms) / Memori (MB)',
+                        color: tickColor
+                    }
                 }
             }
         };
@@ -1261,30 +1422,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateOverviewChart(limitLabel, struktur, insertMs, ramMb) {
         if (!overviewChartInstance) return;
         
-        let bgColor, borderColor;
-        let alpha = 0.5 + (Math.random() * 0.4);
-        if (struktur === 'list') {
-            bgColor = `rgba(129, 140, 248, ${alpha})`;
-            borderColor = '#818cf8';
-        } else {
-            bgColor = `rgba(34, 211, 238, ${alpha})`;
-            borderColor = '#22d3ee';
-        }
+        const mathicalColors = ['#FF66D8', '#5856D6', '#D8F34C', '#FFAD33'];
         const dsLabel = `${limitLabel} (${struktur === 'list' ? 'List' : 'Matrix'})`;
         
         let existingIndex = overviewChartInstance.data.datasets.findIndex(ds => ds.label === dsLabel);
+        let datasetIndex = existingIndex !== -1 ? existingIndex : overviewChartInstance.data.datasets.length;
+        let color = mathicalColors[datasetIndex % mathicalColors.length];
+        
         if (existingIndex !== -1) {
             // Overwrite existing dataset
             overviewChartInstance.data.datasets[existingIndex].data = [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0];
+            overviewChartInstance.data.datasets[existingIndex].backgroundColor = color;
+            overviewChartInstance.data.datasets[existingIndex].borderColor = '#000000';
+            overviewChartInstance.data.datasets[existingIndex].borderWidth = 3;
+            overviewChartInstance.data.datasets[existingIndex].borderRadius = 9999;
+            overviewChartInstance.data.datasets[existingIndex].borderSkipped = false;
+            overviewChartInstance.data.datasets[existingIndex].barPercentage = 0.7;
+            overviewChartInstance.data.datasets[existingIndex].categoryPercentage = 0.7;
         } else {
             // Add new dataset
             overviewChartInstance.data.datasets.push({
                 label: dsLabel,
                 data: [insertMs >= 0 ? insertMs : 0, ramMb >= 0 ? ramMb : 0],
-                backgroundColor: bgColor,
-                borderColor: borderColor,
-                borderWidth: 1.5,
-                borderRadius: 4
+                backgroundColor: color,
+                borderColor: '#000000',
+                borderWidth: 3,
+                borderRadius: 9999,
+                borderSkipped: false,
+                barPercentage: 0.7,
+                categoryPercentage: 0.7
             });
             
             if (overviewChartInstance.data.datasets.length > 8) {
@@ -1296,18 +1462,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (crudChartInstance) {
             let existingCrudIndex = crudChartInstance.data.datasets.findIndex(ds => ds.label === dsLabel);
+            let crudDatasetIndex = existingCrudIndex !== -1 ? existingCrudIndex : crudChartInstance.data.datasets.length;
+            let crudColor = mathicalColors[crudDatasetIndex % mathicalColors.length];
+            
             if (existingCrudIndex !== -1) {
                 // Overwrite existing dataset (clear the CRUD metrics because it's a new benchmark run)
                 crudChartInstance.data.datasets[existingCrudIndex].data = [null, null, null, null, null, null];
+                crudChartInstance.data.datasets[existingCrudIndex].backgroundColor = crudColor;
+                crudChartInstance.data.datasets[existingCrudIndex].borderColor = '#000000';
+                crudChartInstance.data.datasets[existingCrudIndex].borderWidth = 3;
+                crudChartInstance.data.datasets[existingCrudIndex].borderRadius = 9999;
+                crudChartInstance.data.datasets[existingCrudIndex].borderSkipped = false;
+                crudChartInstance.data.datasets[existingCrudIndex].barPercentage = 0.7;
+                crudChartInstance.data.datasets[existingCrudIndex].categoryPercentage = 0.7;
             } else {
                 // Add new dataset
                 crudChartInstance.data.datasets.push({
                     label: dsLabel,
                     data: [null, null, null, null, null, null],
-                    backgroundColor: bgColor,
-                    borderColor: borderColor,
-                    borderWidth: 1.5,
-                    borderRadius: 4
+                    backgroundColor: crudColor,
+                    borderColor: '#000000',
+                    borderWidth: 3,
+                    borderRadius: 9999,
+                    borderSkipped: false,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.7
                 });
                 if (crudChartInstance.data.datasets.length > 8) {
                     crudChartInstance.data.datasets.shift();
@@ -1363,6 +1542,56 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAsal.addEventListener('change', () => populateTujuan(updateAsal, updateTujuan));
         deleteAsal.addEventListener('change', () => populateTujuan(deleteAsal, deleteTujuan));
         insertBaruAsal.addEventListener('change', () => populateTujuan(insertBaruAsal, insertBaruTujuan));
+    }
+
+    // ===================================
+    // Top Controls Quick Search Handler
+    // ===================================
+    const btnQuickSearch = document.getElementById('btnQuickSearch');
+    const quickSearchInput = document.getElementById('quickSearchInput');
+    if (btnQuickSearch && quickSearchInput) {
+        btnQuickSearch.addEventListener('click', () => {
+            const query = quickSearchInput.value.trim();
+            if (!query) {
+                showToast("Masukkan kata kunci pencarian!", "warning");
+                return;
+            }
+            if (!window.GraphData || !window.GraphData.isLoaded) {
+                showToast("Muat dataset terlebih dahulu!", "warning");
+                return;
+            }
+            
+            // Try separating coordinates by "->", " to ", or "-"
+            let parts = [];
+            if (query.includes('->')) parts = query.split('->');
+            else if (query.includes(' to ')) parts = query.split(' to ');
+            else if (query.includes('-')) parts = query.split('-');
+
+            if (parts.length === 2) {
+                const asal = parts[0].trim();
+                const tujuan = parts[1].trim();
+                
+                // Select in search fields
+                searchAsal.value = asal;
+                // Trigger change manually to populate destinations
+                const changeEvent = new Event('change');
+                searchAsal.dispatchEvent(changeEvent);
+                
+                setTimeout(() => {
+                    searchTujuan.value = tujuan;
+                    btnSearch.click();
+                }, 150);
+            } else {
+                // Search single location ID
+                searchLokasiInput.value = query;
+                btnSearchLokasi.click();
+            }
+        });
+        
+        // Allow enter key inside search field
+        quickSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnQuickSearch.click();
+        });
     }
 
     // ===================================

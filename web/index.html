@@ -15,16 +15,25 @@
 <body>
     <div class="grid-pattern"></div>
 
-    <div class="dashboard-container">
+    <div class="dashboard-container sidebar-collapsed">
         
         <!-- ============================================
            ZONE 1: LEFT SIDEBAR NAVIGATION
            ============================================ -->
         <aside class="left-sidebar">
             <div class="nav-brand">
-                <div>
-                    <div class="nav-title">Kelompok 1.3</div>
-                </div>
+                <svg class="flower-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 28px; height: 28px; color: var(--color-pink); flex-shrink: 0;">
+                    <circle cx="12" cy="12" r="3"/>
+                    <circle cx="12" cy="7" r="3"/>
+                    <circle cx="12" cy="17" r="3"/>
+                    <circle cx="7" cy="12" r="3"/>
+                    <circle cx="17" cy="12" r="3"/>
+                    <circle cx="8.46" cy="8.46" r="3"/>
+                    <circle cx="15.54" cy="15.54" r="3"/>
+                    <circle cx="8.46" cy="15.54" r="3"/>
+                    <circle cx="15.54" cy="8.46" r="3"/>
+                </svg>
+                <span class="brand-text">kelompok 1.3</span>
             </div>
 
             <nav class="nav-menu">
@@ -78,6 +87,10 @@
                         <span class="status-dot" id="statusDot"></span>
                         <span id="statusText">Dataset Belum Dimuat</span>
                     </div>
+                    <button class="theme-toggle-btn" id="btnToggleSidebar" title="Tampilkan/Sembunyikan Panel Operasi" style="margin-left: 0.5rem; background: var(--color-pink) !important; color: #000000 !important; box-shadow: 3px 3px 0px #000000; border-radius: 20px !important; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.1rem; height: 1.1rem; color: #000000; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <span>Edit Rute</span>
+                    </button>
                 </div>
             </header>
 
@@ -86,7 +99,7 @@
                 
                 <!-- KPI GRID (Always at top of content for quick scanning) -->
                 <section class="kpi-grid">
-                    <div class="kpi-card" style="border-left-color: var(--accent-indigo);">
+                    <div class="kpi-card card-cream">
                         <div class="kpi-header">
                             <span class="kpi-label">Node Teraktif (V)</span>
                             <span class="kpi-trend green">Simpul</span>
@@ -94,7 +107,7 @@
                         <span class="kpi-value" id="statActiveNodes">0</span>
                         <span class="kpi-subtext">Total lokasi dalam memori</span>
                     </div>
-                    <div class="kpi-card" style="border-left-color: var(--accent-cyan);">
+                    <div class="kpi-card card-pink">
                         <div class="kpi-header">
                             <span class="kpi-label">Rute Terhubung (E)</span>
                             <span class="kpi-trend cyan">Sisi</span>
@@ -102,15 +115,15 @@
                         <span class="kpi-value" id="statActiveEdges">0</span>
                         <span class="kpi-subtext">Total segmen jalan dimuat</span>
                     </div>
-                    <div class="kpi-card" style="border-left-color: var(--accent-amber);">
+                    <div class="kpi-card card-blue">
                         <div class="kpi-header">
-                            <span class="kpi-label">Penggunaan Memori</span>
+                            <span class="kpi-label" style="color: white !important;">Penggunaan Memori</span>
                             <span class="kpi-trend amber">RAM</span>
                         </div>
-                        <span class="kpi-value" id="statMemoryEst">—</span>
-                        <span class="kpi-subtext">Alokasi struktur data</span>
+                        <span class="kpi-value" id="statMemoryEst" style="color: white !important;">—</span>
+                        <span class="kpi-subtext" style="color: #dddddd !important;">Alokasi struktur data</span>
                     </div>
-                    <div class="kpi-card highlight-kpi" style="border-left-color: var(--accent-emerald);">
+                    <div class="kpi-card card-grey">
                         <div class="kpi-header">
                             <span class="kpi-label">Waktu Operasi Terakhir</span>
                             <span class="kpi-trend emerald" id="lastOpTimeTrend">Latency</span>
@@ -124,33 +137,128 @@
                    VIEW 1: DASHBOARD OVERVIEW (TAB GABUNGAN)
                    ============================================ -->
                 <section class="view-section" id="view-dashboard">
+                    
+                    <!-- Brutalist Hero Banner -->
+                    <div class="brutalist-banner card-pink">
+                        <div class="banner-content">
+                            <h2 class="banner-title">
+                                Bagaimana jika Anda bisa 
+                                <span class="pill-span pill-blue">optimasi latensi</span> 
+                                rute tanpa semua 
+                                <span class="pill-span pill-cream">tebakan?</span>
+                            </h2>
+                            <p class="banner-subtitle">Bandingkan efisiensi memori dan latensi operasi Adjacency List vs Adjacency Matrix menggunakan Dataset Road Central USA secara real-time.</p>
+                        </div>
+                        <div class="banner-decor">
+                            <svg class="banner-flower" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="12" r="3"/>
+                                <circle cx="12" cy="7" r="3"/>
+                                <circle cx="12" cy="17" r="3"/>
+                                <circle cx="7" cy="12" r="3"/>
+                                <circle cx="17" cy="12" r="3"/>
+                                <circle cx="8.46" cy="8.46" r="3"/>
+                                <circle cx="15.54" cy="15.54" r="3"/>
+                                <circle cx="8.46" cy="15.54" r="3"/>
+                                <circle cx="15.54" cy="8.46" r="3"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Top Controls Grid (Mathical Blue Cards) -->
+                    <div class="top-controls-grid">
+                        <!-- Card A: Pengaturan Struktur Data -->
+                        <div class="ui-card card-blue" style="display: flex; flex-direction: column; justify-content: center; padding: 1.5rem;">
+                            <span class="control-label">Struktur Data Utama & Aksi</span>
+                            <div class="control-row">
+                                <div class="struct-toggle" style="background: rgba(255, 255, 255, 0.15) !important; border: 3px solid #000000; padding: 4px; border-radius: 9999px;">
+                                    <button class="struct-btn active" id="toggleListBtn" style="color: #ffffff !important; border-radius: 9999px !important; font-weight: 800; font-size: 0.8rem; padding: 0.45rem 1rem !important;">Adjacency List</button>
+                                    <button class="struct-btn" id="toggleMatrixBtn" style="color: #ffffff !important; border-radius: 9999px !important; font-weight: 800; font-size: 0.8rem; padding: 0.45rem 1rem !important;">Adjacency Matrix</button>
+                                </div>
+                                <button class="btn btn-primary" id="btnInsertDataset" style="margin-left: 0.75rem; background-color: var(--color-pink) !important; color: #000000 !important; font-weight: 800; border-radius: 9999px !important;">
+                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.1rem; height: 1.1rem; color: #000000;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                    Insert Dataset
+                                </button>
+                                <button class="btn btn-ghost" id="btnRefreshWebsite" style="margin-left: 0.5rem; background-color: #ffffff !important; color: #000000 !important; font-weight: 800; border-radius: 9999px !important;" title="Clear All / Restart">
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card B: Pencarian Cepat -->
+                        <div class="ui-card card-blue" style="display: flex; flex-direction: column; justify-content: center; padding: 1.5rem;">
+                            <span class="control-label">Pencarian Elemen Jaringan Cepat</span>
+                            <div class="control-row search-bar-row">
+                                <input type="text" id="quickSearchInput" placeholder="Masukkan ID Lokasi atau Rute (misal: Lokasi_1023 -> Lokasi_5041)..." class="form-input">
+                                <button class="btn btn-flower-search" id="btnQuickSearch" title="Cari">
+                                    <svg class="flower-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 1.2rem; height: 1.2rem; color: #ffffff;">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <circle cx="12" cy="7" r="3"/>
+                                        <circle cx="12" cy="17" r="3"/>
+                                        <circle cx="7" cy="12" r="3"/>
+                                        <circle cx="17" cy="12" r="3"/>
+                                        <circle cx="8.46" cy="8.46" r="3"/>
+                                        <circle cx="15.54" cy="15.54" r="3"/>
+                                        <circle cx="8.46" cy="15.54" r="3"/>
+                                        <circle cx="15.54" cy="8.46" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dashboard-layout-grid">
-                        
-                        <!-- Col 1a: Overview Chart (Load & RAM) -->
-                        <div class="ui-card" style="display: flex; flex-direction: column;">
+                        <!-- Col 1: Overview Chart (Load & RAM) -->
+                        <div class="ui-card card-cream" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                 Grafik Beban (Load Time & RAM)
                             </div>
-                            <div style="flex:1; min-height: 200px; position: relative;">
+                            <div style="flex:1; min-height: 380px; position: relative;">
                                 <canvas id="overviewChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- Col 1b: CRUD Operations Chart -->
-                        <div class="ui-card" style="display: flex; flex-direction: column;">
+                        <!-- Col 2: CRUD Operations Chart -->
+                        <div class="ui-card card-grey" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 Grafik Latensi Operasi Langsung (Live CRUD)
                             </div>
-                            <div style="flex:1; min-height: 200px; position: relative;">
+                            <div style="flex:1; min-height: 380px; position: relative;">
                                 <canvas id="crudChart"></canvas>
                             </div>
                             <p class="bench-hint" style="margin-top: 0.75rem;">*Menampilkan waktu operasi (ms) pada dataset yang sedang aktif saat ini.</p>
                         </div>
 
-                        <!-- Col 2: Recent Routes Mini Table -->
-                        <div class="ui-card" style="display: flex; flex-direction: column;">
+                        <!-- Col 3: Network preview details -->
+                        <div class="ui-card card-pink" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 5.447-2.724A1 1 0 0121 3.182v10.764a1 1 0 01-.553.894L15 18l-6 2zM9 2v18m6-15v13"/></svg>
+                                Pratinjau Jaringan Graf Rute
+                            </div>
+                            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 1rem 0;">
+                                <div class="mini-network-visual-card">
+                                    <div class="pulse-node" id="miniNodePulse" style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent-indigo-dim); border: 2px dashed var(--accent-indigo); display: flex; align-items: center; justify-content: center; color: var(--accent-indigo); font-weight: bold; margin-bottom: 0.85rem;">G</div>
+                                    <h4 id="miniGraphTitle" style="font-weight:600; font-size: 0.9rem; margin-bottom: 0.35rem;">Graf Jaringan Belum Aktif</h4>
+                                    <p id="miniGraphDesc" style="font-size:0.75rem; color: var(--text-tertiary); max-width: 200px; margin-bottom: 1rem;">Silakan muat dataset di panel kanan untuk mengaktifkan visualisasi peta rute.</p>
+                                    <button class="btn btn-ghost" id="btnGoToVisualizer" style="font-size:0.75rem; padding: 0.4rem 0.8rem;">Buka Full Visualizer →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Col 5: Mini Logs View -->
+                        <div class="ui-card card-dark" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                Ringkasan Sistem Log C++
+                            </div>
+                            <div style="flex:1;">
+                                <pre id="miniConsoleLog" class="mini-console-output">Sistem siap... Silakan muat dataset untuk melihat aktivitas log.</pre>
+                            </div>
+                        </div>
+
+                        <!-- Col 4: Recent Routes Mini Table -->
+                        <div class="ui-card card-cream card-span-2" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                 Rangkuman Rute Teratas (Edge Preview)
@@ -174,33 +282,6 @@
                             </div>
                         </div>
 
-                        <!-- Col 3: Network preview details -->
-                        <div class="ui-card" style="display: flex; flex-direction: column;">
-                            <div class="card-header">
-                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 5.447-2.724A1 1 0 0121 3.182v10.764a1 1 0 01-.553.894L15 18l-6 2zM9 2v18m6-15v13"/></svg>
-                                Pratinjau Jaringan Graf Rute
-                            </div>
-                            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 1rem 0;">
-                                <div class="mini-network-visual-card">
-                                    <div class="pulse-node" id="miniNodePulse" style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent-indigo-dim); border: 2px dashed var(--accent-indigo); display: flex; align-items: center; justify-content: center; color: var(--accent-indigo); font-weight: bold; margin-bottom: 0.85rem;">G</div>
-                                    <h4 id="miniGraphTitle" style="font-weight:600; font-size: 0.9rem; margin-bottom: 0.35rem;">Graf Jaringan Belum Aktif</h4>
-                                    <p id="miniGraphDesc" style="font-size:0.75rem; color: var(--text-tertiary); max-width: 200px; margin-bottom: 1rem;">Silakan muat dataset di panel kanan untuk mengaktifkan visualisasi peta rute.</p>
-                                    <button class="btn btn-ghost" id="btnGoToVisualizer" style="font-size:0.75rem; padding: 0.4rem 0.8rem;">Buka Full Visualizer →</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Col 4: Mini Logs View -->
-                        <div class="ui-card" style="display: flex; flex-direction: column;">
-                            <div class="card-header">
-                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                                Ringkasan Sistem Log C++
-                            </div>
-                            <div style="flex:1;">
-                                <pre id="miniConsoleLog" class="mini-console-output">Sistem siap... Silakan muat dataset untuk melihat aktivitas log.</pre>
-                            </div>
-                        </div>
-
                     </div>
                 </section>
 
@@ -208,7 +289,7 @@
                    VIEW 2: FULL GRAPH VISUALIZER
                    ============================================ -->
                 <section class="view-section hidden" id="view-graph">
-                    <div class="ui-card viz-panel" style="height: calc(100vh - 180px); min-height: 450px;">
+                    <div class="ui-card viz-panel card-cream" style="height: calc(100vh - 180px); min-height: 450px;">
                         <div class="viz-canvas">
                             <div class="sample-badge" id="sampleBadge" style="display: none;">
                                 ⚠️ Sampel Visual: <span id="displayedEdges">0</span> Edge dari <span id="totalEdges">0</span> Total
@@ -249,7 +330,7 @@
                    VIEW 3: BENCHMARK ANALYSIS
                    ============================================ -->
                 <section class="view-section hidden" id="view-benchmark">
-                    <div class="ui-card benchmark-section">
+                    <div class="ui-card benchmark-section card-grey">
                         <div class="benchmark-header-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
                             <h3>Analisis Performa Lintas Batas Dataset</h3>
                             <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -283,7 +364,7 @@
                    VIEW 4: DATASET TABLE
                    ============================================ -->
                 <section class="view-section hidden" id="view-table">
-                    <div class="ui-card table-card">
+                    <div class="ui-card table-card card-cream">
                         <div class="table-toolbar">
                             <h2 class="table-title">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1.1rem;height:1.1rem;color:var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -327,7 +408,7 @@
                    VIEW 5: CONSOLE LOGS
                    ============================================ -->
                 <section class="view-section hidden" id="view-console">
-                    <div class="ui-card console-card" style="height: calc(100vh - 180px); min-height: 450px; display:flex; flex-direction:column; padding: 0 !important; overflow:hidden;">
+                    <div class="ui-card console-card card-dark" style="height: calc(100vh - 180px); min-height: 450px; display:flex; flex-direction:column; padding: 0 !important; overflow:hidden;">
                         <div class="console-header" style="flex-shrink: 0;">
                             <span class="console-dot red"></span>
                             <span class="console-dot yellow"></span>
@@ -346,29 +427,16 @@
            ============================================ -->
         <aside class="right-sidebar">
             
-            <!-- Global Config Card -->
-            <div class="ui-card sidebar-card">
-                <h3 class="sidebar-card-title">Pengaturan Graf</h3>
-                <div class="form-group">
-                    <label class="form-label">Struktur Data Utama</label>
-                    <div class="struct-toggle">
-                        <button class="struct-btn active" id="toggleListBtn">Adjacency List</button>
-                        <button class="struct-btn" id="toggleMatrixBtn">Adjacency Matrix</button>
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="btnInsertDataset" style="width: 100%; margin-top: 0.5rem;">
-                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                    Insert Dataset
-                </button>
-                <button class="btn btn-ghost" id="btnRefreshWebsite" style="width: 100%; margin-top: 0.5rem; color: var(--accent-rose); border: 1px solid var(--accent-rose);" title="Mulai ulang semua dari nol">
-                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Restart Web / Clear All
-                </button>
-            </div>
+
 
             <!-- Operations Card (CRUD - Collapsible Accordion Style) -->
-            <div class="ui-card sidebar-card" style="flex: 1; display:flex; flex-direction:column; min-height: 320px; overflow:hidden; padding: 1.25rem 0.5rem 1.25rem 1.25rem !important;">
-                <h3 class="sidebar-card-title" style="padding-right: 0.75rem;">Operasi Rute</h3>
+            <div class="ui-card sidebar-card card-dark" style="flex: 1; display:flex; flex-direction:column; min-height: 320px; overflow:hidden; padding: 1.25rem 0.5rem 1.25rem 1.25rem !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 0.75rem; padding-bottom: 0.5rem; margin-bottom: 1.15rem; border-bottom: 2px solid #000000;">
+                    <h3 class="sidebar-card-title" style="border: none !important; margin: 0 !important; padding: 0 !important; font-size: 0.85rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; color: currentColor; letter-spacing: 0.05em;">Operasi Rute</h3>
+                    <button class="btn-close-sidebar" id="btnCloseSidebar" title="Tutup Panel" style="background: transparent; border: none; color: #a3a3a3; cursor: pointer; font-size: 1.5rem; font-weight: 800; line-height: 1; transition: color 0.2s; margin-top: -3px;">
+                        &times;
+                    </button>
+                </div>
                 
                 <div class="ops-accordion-container" style="flex:1; overflow-y:auto; padding-right: 0.75rem;">
                     <!-- Accordion Section 0a: Insert Lokasi -->
@@ -515,7 +583,7 @@
             </div>
 
             <!-- Inspector Card -->
-            <div class="ui-card sidebar-card" style="height: 220px; display:flex; flex-direction:column; overflow:hidden;">
+            <div class="ui-card sidebar-card card-dark" style="height: 220px; display:flex; flex-direction:column; overflow:hidden;">
                 <h3 class="sidebar-card-title">Live Data Inspector</h3>
                 <div class="inspect-content" id="inspectBody" style="flex:1;">
                     <div class="inspect-empty">
