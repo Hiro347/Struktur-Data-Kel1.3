@@ -9,7 +9,9 @@
                 "-g",
                 "${workspaceFolder}\\main.cpp",
                 "-o",
-                "${workspaceFolder}\\main.exe"
+                "${workspaceFolder}\\main.exe",
+                "-lws2_32",
+                "-lpsapi"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
